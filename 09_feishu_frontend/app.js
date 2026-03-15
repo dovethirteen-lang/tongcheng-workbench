@@ -38,6 +38,7 @@ function renderApiStatus() {
   node.className = `pill ${apiAvailable ? "success" : "neutral"}`;
   node.textContent = apiAvailable ? "后端状态：已连接" : "后端状态：静态预览";
   document.getElementById("btnSubmitCommand").disabled = !apiAvailable;
+  document.getElementById("btnSubmitGenerated").disabled = !apiAvailable;
   document.getElementById("modalHint").textContent = apiAvailable
     ? "当前已连接本地主控。你可以直接提交到后端，也可以保存到本地历史后再发给飞书助手。"
     : "当前是静态预览模式。你可以生成命令、保存到本地历史，或复制后发给飞书里的工作助手。";
@@ -562,27 +563,16 @@ async function reloadWorkbench() {
   }
 }
 
-async function submitCommand() {
-  if (!apiAvailable) {
-    showToast("当前未连接本地后端，请先复制命令发送给飞书助手。");
-    return;
-  }
-
-  const text = document.getElementById("commandText").value.trim();
-  if (!text) {
-    showToast("命令内容不能为空。");
-    return;
-  }
-
+async function submitTextCommand(text, intent, lane, action) {
   const response = await fetch("/api/command", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       text,
       source: "workbench_frontend",
-      intent: currentIntent || undefined,
-      lane: currentLane || undefined,
-      action: currentAction || undefined,
+      intent: intent || undefined,
+      lane: lane || undefined,
+      action: action || undefined,
     }),
   });
 
@@ -599,10 +589,26 @@ async function submitCommand() {
 
   const entry = createLocalHistoryEntry(text, "submitted", payload);
   rememberLocalAction(entry);
-  closeModal();
   bind(payload.state);
   renderResult(payload);
   showToast("命令已提交到主控。");
+  return payload;
+}
+
+async function submitCommand() {
+  if (!apiAvailable) {
+    showToast("当前未连接本地后端，请先复制命令发送给飞书助手。");
+    return;
+  }
+
+  const text = document.getElementById("commandText").value.trim();
+  if (!text) {
+    showToast("命令内容不能为空。");
+    return;
+  }
+
+  await submitTextCommand(text, currentIntent, currentLane, currentAction);
+  closeModal();
 }
 
 function applyTemplatesToComposer() {
@@ -610,6 +616,17 @@ function applyTemplatesToComposer() {
     saveComposerDraft();
     document.getElementById("composerOutput").value = buildComposerCommand();
     showToast("标准命令已生成。");
+  });
+
+  document.getElementById("btnSubmitGenerated").addEventListener("click", async () => {
+    saveComposerDraft();
+    const text = document.getElementById("composerOutput").value.trim() || buildComposerCommand();
+    document.getElementById("composerOutput").value = text;
+    if (!apiAvailable) {
+      showToast("当前未连接本地后端，请先复制命令发送给飞书助手。");
+      return;
+    }
+    await submitTextCommand(text, document.getElementById("composerAction").value, document.getElementById("composerLane").value, document.getElementById("composerAction").value);
   });
 
   document.getElementById("btnUseGenerated").addEventListener("click", () => {

@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>同程产品工作台 | 飞书前台</title>
-  <link rel="stylesheet" href="./styles.css?v=20260316012558">
+  <link rel="stylesheet" href="./styles.css?v=20260316025321">
 </head>
 <body>
   <div class="app-shell">
@@ -87,6 +87,7 @@
       </div>
       <div class="composer-actions">
         <button type="button" id="btnGenerateCommand">生成标准命令</button>
+        <button type="button" class="ghost" id="btnSubmitGenerated">直接提交生成结果</button>
         <button type="button" class="ghost" id="btnUseGenerated">放入弹窗继续处理</button>
       </div>
       <textarea id="composerOutput" class="composer-output" readonly placeholder="这里会自动生成可直接发送给飞书助手的标准命令"></textarea>
@@ -227,6 +228,6 @@
 
   <div class="toast hidden" id="toast"></div>
 
-  <script src="./app.js?v=20260316012558"></script>
+  <script src="./app.js?v=20260316025321"></script>
 </body>
 </html>
