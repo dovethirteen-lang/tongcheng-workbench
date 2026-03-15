@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>同程产品工作台 · 飞书前台</title>
+  <title>同程产品工作台 | 飞书前台</title>
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
@@ -12,14 +12,17 @@
       <div>
         <p class="eyebrow">Feishu Workbench Preview</p>
         <h1>同程产品工作台</h1>
-        <p class="hero-copy">面向飞书工作台的每日作战首页。它优先承接你真正会看的内容：数据告警、待办、文档状态、反馈池和版本进展。</p>
+        <p class="hero-copy">
+          面向飞书工作台的每日作战首页。它优先承接你真正会看的内容：数据告警、待办、文档状态、反馈池和版本进展。
+        </p>
       </div>
       <div class="hero-side">
         <div class="hero-pill" id="updatedAt">更新时间 -</div>
         <div class="quick-actions">
-          <button type="button">新建需求卡片</button>
-          <button type="button">生成 PRD 草稿</button>
-          <button type="button">查看数据告警</button>
+          <button type="button" id="btnNewCard">新建需求卡片</button>
+          <button type="button" id="btnNewPrd">生成 PRD 草稿</button>
+          <button type="button" id="btnViewAlerts">查看数据告警</button>
+          <button type="button" class="ghost" id="btnReload">重新加载</button>
         </div>
       </div>
     </header>
@@ -27,7 +30,7 @@
     <section class="metrics" id="metrics"></section>
 
     <main class="layout">
-      <section class="panel alert-panel">
+      <section class="panel alert-panel" id="alertSection">
         <div class="panel-head">
           <div>
             <p class="panel-kicker danger">Priority Lane</p>
@@ -39,7 +42,7 @@
       </section>
 
       <section class="column">
-        <section class="panel">
+        <section class="panel" id="todoSection">
           <div class="panel-head">
             <div>
               <p class="panel-kicker">Single Pool</p>
@@ -50,7 +53,7 @@
           <div id="todoList" class="table-wrap"></div>
         </section>
 
-        <section class="panel">
+        <section class="panel" id="docSection">
           <div class="panel-head">
             <div>
               <p class="panel-kicker">Document Flow</p>
@@ -83,7 +86,7 @@
           <div id="releaseList" class="stack compact"></div>
         </section>
 
-        <section class="panel">
+        <section class="panel" id="feedbackSection">
           <div class="panel-head">
             <div>
               <p class="panel-kicker">Feedback Inbox</p>
@@ -96,6 +99,28 @@
       </section>
     </main>
   </div>
+
+  <div class="modal hidden" id="commandModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <p class="panel-kicker">Command Template</p>
+          <h2 id="modalTitle">命令模板</h2>
+        </div>
+        <button type="button" class="icon-btn" id="btnCloseModal" aria-label="关闭">×</button>
+      </div>
+      <p class="modal-copy" id="modalCopy">
+        复制下面这条命令，直接发给飞书里的工作助手。
+      </p>
+      <textarea id="commandText" readonly></textarea>
+      <div class="modal-actions">
+        <button type="button" id="btnCopyCommand">复制命令</button>
+        <button type="button" class="ghost" id="btnDismissModal">我知道了</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast hidden" id="toast"></div>
 
   <script src="./app.js"></script>
 </body>
