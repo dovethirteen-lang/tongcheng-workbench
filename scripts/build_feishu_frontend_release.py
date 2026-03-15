@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import shutil
 import sys
+from datetime import datetime
 from pathlib import Path
 
 
@@ -17,6 +18,7 @@ def main() -> None:
 
     source_dir = BASE_DIR / "09_feishu_frontend"
     target_dir = BASE_DIR / "site" / "feishu-workbench"
+    asset_version = datetime.now().strftime("%Y%m%d%H%M%S")
 
     if target_dir.exists():
         shutil.rmtree(target_dir)
@@ -30,6 +32,10 @@ def main() -> None:
             shutil.copytree(item, destination)
         else:
             shutil.copy2(item, destination)
+
+    index_path = target_dir / "index.html"
+    index_text = index_path.read_text(encoding="utf-8").replace("__ASSET_VERSION__", asset_version)
+    index_path.write_text(index_text, encoding="utf-8")
 
     print(target_dir)
 

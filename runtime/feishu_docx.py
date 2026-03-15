@@ -117,14 +117,18 @@ def create_doc_draft(base_dir: Path, parsed: ParsedCommand, reply: dict[str, Any
         blocks.append(_text_block("输入资料：", block_type=3, field="heading2"))
         blocks.extend(_text_block(f"- {item}") for item in parsed.inputs[:5])
 
-    _append_blocks(client, document_id, blocks)
-    return {
+    payload = {
         "document_id": document_id,
         "revision_id": document.revision_id,
         "title": document.title,
         "url": f"https://feishu.cn/docx/{document_id}",
         "status": "draft",
     }
+    try:
+        _append_blocks(client, document_id, blocks)
+    except FeishuDocxError as exc:
+        payload["warning"] = str(exc)
+    return payload
 
 
 def append_revision_request(base_dir: Path, parsed: ParsedCommand, revision_index: int) -> dict[str, Any]:

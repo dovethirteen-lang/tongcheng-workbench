@@ -1,9 +1,40 @@
-async function loadData() {
+let apiAvailable = false;
+let currentCommandTemplate = "";
+
+async function loadStaticData() {
   const response = await fetch("./data/workbench.json", { cache: "no-store" });
   if (!response.ok) {
     throw new Error("Failed to load frontend data");
   }
   return response.json();
+}
+
+async function loadApiState() {
+  const response = await fetch("/api/state", { cache: "no-store" });
+  if (!response.ok) {
+    throw new Error("Failed to load API state");
+  }
+  return response.json();
+}
+
+async function detectApi() {
+  try {
+    const response = await fetch("/api/health", { cache: "no-store" });
+    apiAvailable = response.ok;
+  } catch (_error) {
+    apiAvailable = false;
+  }
+  renderApiStatus();
+}
+
+function renderApiStatus() {
+  const node = document.getElementById("apiStatus");
+  node.className = `pill ${apiAvailable ? "success" : "neutral"}`;
+  node.textContent = apiAvailable ? "后端状态：已连接" : "后端状态：静态预览";
+  document.getElementById("btnSubmitCommand").disabled = !apiAvailable;
+  document.getElementById("modalHint").textContent = apiAvailable
+    ? "当前已连接本地主控。你可以直接提交到后端，也可以复制后发给飞书助手。"
+    : "当前是静态预览模式。你可以先复制下面这条命令，发给飞书里的工作助手。";
 }
 
 function metric(label, value, suffix = "") {
@@ -27,11 +58,9 @@ function renderCell(field, value) {
   if (!value) {
     return "<td>-</td>";
   }
-
   if (field.toLowerCase().includes("url")) {
     return `<td><a class="link" href="${escapeHtml(value)}" target="_blank" rel="noopener noreferrer">打开链接</a></td>`;
   }
-
   return `<td>${escapeHtml(value)}</td>`;
 }
 
@@ -39,12 +68,10 @@ function renderTable(items, fields, emptyText) {
   if (!items.length) {
     return `<p class="empty">${emptyText}</p>`;
   }
-
   const rows = items.map((item) => {
     const cols = fields.map((field) => renderCell(field, item[field])).join("");
     return `<tr>${cols}</tr>`;
   }).join("");
-
   return `<table><tbody>${rows}</tbody></table>`;
 }
 
@@ -64,7 +91,6 @@ function renderAlerts(items) {
   if (!items.length) {
     return `<p class="empty">暂无数据告警</p>`;
   }
-
   return items.map((item) => `
     <div class="alert-card">
       <strong>${escapeHtml(item.title || "")}</strong>
@@ -74,17 +100,20 @@ function renderAlerts(items) {
   `).join("");
 }
 
+function renderCommands(items) {
+  return renderTable(items, ["task_type", "source", "created_at"], "暂无命令记录");
+}
+
 function showToast(message) {
   const toast = document.getElementById("toast");
   toast.textContent = message;
   toast.classList.remove("hidden");
   window.clearTimeout(showToast.timer);
-  showToast.timer = window.setTimeout(() => {
-    toast.classList.add("hidden");
-  }, 2400);
+  showToast.timer = window.setTimeout(() => toast.classList.add("hidden"), 2200);
 }
 
 function openModal(title, command) {
+  currentCommandTemplate = command;
   document.getElementById("modalTitle").textContent = title;
   document.getElementById("commandText").value = command;
   document.getElementById("commandModal").classList.remove("hidden");
@@ -98,9 +127,8 @@ async function copyCommand() {
   const text = document.getElementById("commandText").value;
   try {
     await navigator.clipboard.writeText(text);
-    showToast("命令已复制，可以直接发给飞书助手。");
-  } catch (error) {
-    console.error(error);
+    showToast("命令已复制。");
+  } catch (_error) {
     showToast("复制失败，请手动复制。");
   }
 }
@@ -109,15 +137,91 @@ function scrollToSection(id) {
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
+async function getState() {
+  if (apiAvailable) {
+    return loadApiState();
+  }
+  return loadStaticData();
+}
+
+function renderResult(result) {
+  const node = document.getElementById("resultBox");
+  if (!result) {
+    node.className = "result-box empty";
+    node.textContent = "还没有执行记录。";
+    return;
+  }
+  const parts = [];
+  if (result.summary) {
+    parts.push(`<p>${escapeHtml(result.summary)}</p>`);
+  }
+  if (result.doc_draft?.url) {
+    parts.push(`<p><a class="link" href="${escapeHtml(result.doc_draft.url)}" target="_blank" rel="noopener noreferrer">打开飞书草稿</a></p>`);
+  }
+  if (result.warnings?.length) {
+    parts.push(...result.warnings.map((item) => `<p class="warn-text">警告：${escapeHtml(item)}</p>`));
+  }
+  if (result.errors?.length) {
+    parts.push(...result.errors.map((item) => `<p class="error-text">错误：${escapeHtml(item)}</p>`));
+  }
+  if (result.wiki_handoff?.path) {
+    parts.push(`<p>已生成 Wiki 中间稿：${escapeHtml(result.wiki_handoff.path)}</p>`);
+  }
+  if (result.alert_item?.title) {
+    parts.push(`<p>已登记数据告警：${escapeHtml(result.alert_item.title)}</p>`);
+  }
+  node.className = "result-box";
+  node.innerHTML = parts.join("") || "<p>已提交主控处理。</p>";
+}
+
 async function reloadWorkbench() {
   try {
-    const data = await loadData();
+    await detectApi();
+    const data = await getState();
     bind(data);
     showToast("工作台数据已刷新。");
   } catch (error) {
     console.error(error);
     showToast("刷新失败，请稍后重试。");
   }
+}
+
+async function submitCommand() {
+  if (!apiAvailable) {
+    showToast("当前未连接本地后端，请先复制命令发送给飞书助手。");
+    return;
+  }
+
+  const text = document.getElementById("commandText").value.trim();
+  if (!text) {
+    showToast("命令内容不能为空。");
+    return;
+  }
+
+  const response = await fetch("/api/command", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      text,
+      source: "workbench_frontend",
+    }),
+  });
+
+  if (!response.ok) {
+    showToast("提交失败，请查看后端日志。");
+    return;
+  }
+
+  const payload = await response.json();
+  if (!payload.ok) {
+    showToast(payload.error || "提交失败。");
+    return;
+  }
+
+  closeModal();
+  bind(payload.state);
+  renderResult(payload);
+  showToast("命令已提交到主控。");
 }
 
 function wireActions() {
@@ -150,9 +254,9 @@ function wireActions() {
 
   document.getElementById("btnReload").addEventListener("click", reloadWorkbench);
   document.getElementById("btnCopyCommand").addEventListener("click", copyCommand);
+  document.getElementById("btnSubmitCommand").addEventListener("click", submitCommand);
   document.getElementById("btnCloseModal").addEventListener("click", closeModal);
   document.getElementById("btnDismissModal").addEventListener("click", closeModal);
-
   document.getElementById("commandModal").addEventListener("click", (event) => {
     if (event.target.id === "commandModal") {
       closeModal();
@@ -178,6 +282,7 @@ function bind(data) {
   document.getElementById("alertList").innerHTML = renderAlerts(data.alerts);
   document.getElementById("todoList").innerHTML = renderTable(data.todos, ["title", "deadline_hint", "status"], "暂无待办");
   document.getElementById("docList").innerHTML = renderTable(data.documents, ["title", "status", "document_url"], "暂无文档记录");
+  document.getElementById("commandList").innerHTML = renderCommands(data.commands);
   document.getElementById("capabilityList").innerHTML = renderChips(data.capabilities);
   document.getElementById("releaseList").innerHTML = renderRelease(data.release_plan);
   document.getElementById("feedbackList").innerHTML = renderTable(data.feedback, ["title", "category", "status"], "暂无反馈");
@@ -185,9 +290,14 @@ function bind(data) {
 
 wireActions();
 
-loadData()
-  .then(bind)
-  .catch((error) => {
+(async () => {
+  try {
+    await detectApi();
+    const data = await getState();
+    bind(data);
+    renderResult(null);
+  } catch (error) {
     console.error(error);
     document.body.innerHTML = '<div class="app-shell"><p class="empty">前台数据加载失败，请先执行 render_feishu_frontend.py。</p></div>';
-  });
+  }
+})();

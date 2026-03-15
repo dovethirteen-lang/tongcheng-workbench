@@ -1,6 +1,35 @@
 {
-  "updated_at": "2026-03-15T22:36:10",
-  "commands": [],
+  "updated_at": "2026-03-15T23:27:52",
+  "commands": [
+    {
+      "command_id": "cmd-1e06f940",
+      "task_type": "wechat_growth",
+      "source": "workbench_frontend",
+      "normalized_text": "读取这个 Notion / 飞书文档链接，先整理成需求卡片草稿，不要归档。 请输出：背景、目标、用户路径、规则、风险、待确认项。 完成后把飞书文档链接回给我。",
+      "created_at": "2026-03-15T23:16:56"
+    },
+    {
+      "command_id": "cmd-dfe8aa05",
+      "task_type": "wechat_growth",
+      "source": "workbench_frontend",
+      "normalized_text": "读取这个 Notion / 飞书文档链接，先整理成需求卡片草稿，不要归档。 请输出：背景、目标、用户路径、规则、风险、待确认项。 完成后把飞书文档链接回给我。",
+      "created_at": "2026-03-15T23:11:55"
+    },
+    {
+      "command_id": "cmd-7e20fbf6",
+      "task_type": "general",
+      "source": "workbench_frontend",
+      "normalized_text": "????????:???????????????,??????????????",
+      "created_at": "2026-03-15T23:10:04"
+    },
+    {
+      "command_id": "cmd-2276adf0",
+      "task_type": "general",
+      "source": "workbench_frontend",
+      "normalized_text": "????????:???????????????,??????????????",
+      "created_at": "2026-03-15T23:08:14"
+    }
+  ],
   "documents": [],
   "todos": [],
   "feedback": [],
