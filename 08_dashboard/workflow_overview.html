@@ -1,812 +1,209 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>同程产品工作台总控台</title>
   <style>
     :root {
-      --bg: #06080f;
-      --panel: #0e121b;
-      --panel-2: #141927;
-      --line: #1c2437;
-      --text: #e6ecfb;
-      --muted: #7d8aa7;
-      --brand: #6aa3ff;
-      --brand-2: #8d7aff;
-      --ok: #2ecc8a;
-      --warn: #f6c445;
-      --danger: #ff5a78;
-      --card-shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
-      --radius: 18px;
+      --bg: #08111e;
+      --panel: rgba(16, 25, 43, 0.92);
+      --line: #233556;
+      --text: #edf4ff;
+      --muted: #93a6c9;
+      --brand: #66b3ff;
+      --warn: #ffbf47;
+      --danger: #ff6d85;
+      --ok: #36d399;
     }
-
-    * {
-      box-sizing: border-box;
-    }
-
+    * { box-sizing: border-box; }
     body {
       margin: 0;
-      min-height: 100vh;
       color: var(--text);
-      font-family: "PingFang SC", "Microsoft YaHei UI", sans-serif;
+      font: 14px/1.65 "Segoe UI", "Microsoft YaHei", sans-serif;
       background:
-        radial-gradient(circle at top left, rgba(106, 163, 255, 0.16), transparent 26%),
-        radial-gradient(circle at top right, rgba(141, 122, 255, 0.15), transparent 20%),
-        linear-gradient(180deg, #070a12 0%, #05070d 100%);
+        radial-gradient(circle at top left, rgba(102,179,255,0.16), transparent 28%),
+        radial-gradient(circle at top right, rgba(255,191,71,0.12), transparent 24%),
+        linear-gradient(180deg, #07101c 0%, #08111e 100%);
     }
-
     .shell {
-      max-width: 1500px;
+      max-width: 1460px;
       margin: 0 auto;
       padding: 22px;
     }
-
-    .hero,
-    .panel,
-    .tabbar {
-      background: rgba(14, 18, 27, 0.92);
+    .hero, .panel {
+      background: var(--panel);
       border: 1px solid var(--line);
-      border-radius: var(--radius);
-      box-shadow: var(--card-shadow);
+      border-radius: 20px;
+      box-shadow: 0 20px 55px rgba(0,0,0,0.24);
     }
-
     .hero {
-      padding: 22px 24px;
+      padding: 24px;
       margin-bottom: 16px;
     }
-
     .hero-top {
       display: flex;
       justify-content: space-between;
+      gap: 16px;
       align-items: flex-start;
-      gap: 18px;
       margin-bottom: 18px;
     }
-
-    .hero h1 {
-      margin: 0 0 10px;
-      font-size: clamp(28px, 5vw, 46px);
-      line-height: 1.06;
-      letter-spacing: -0.04em;
-    }
-
-    .hero p {
-      margin: 0;
-      max-width: 880px;
-      line-height: 1.72;
-      color: var(--muted);
-      font-size: 15px;
-    }
-
-    .brand-mark {
-      font-size: 11px;
-      color: var(--muted);
-      line-height: 1.7;
-      text-align: right;
-      white-space: nowrap;
-    }
-
-    .logo {
-      font-size: 20px;
-      font-weight: 800;
-      background: linear-gradient(135deg, var(--brand), var(--brand-2));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 6px;
-    }
-
-    .chip-row,
-    .metric-row,
-    .mini-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .chip,
-    .tab,
-    .status-pill,
-    .mini-tag {
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      background: rgba(20, 25, 39, 0.95);
-    }
-
-    .chip {
-      padding: 6px 12px;
-      color: var(--muted);
-      font-size: 11px;
-      font-weight: 700;
-    }
-
-    .chip.ok {
-      color: var(--ok);
-      border-color: rgba(46, 204, 138, 0.25);
-    }
-
-    .chip.brand {
+    h1, h2, h3 { margin: 0 0 10px; }
+    h1 { font-size: clamp(30px, 5vw, 48px); line-height: 1.05; letter-spacing: -0.04em; }
+    h2 { font-size: 20px; }
+    .muted { color: var(--muted); }
+    .brand {
       color: var(--brand);
-      border-color: rgba(106, 163, 255, 0.28);
-    }
-
-    .metric-row {
-      margin-top: 16px;
-    }
-
-    .metric {
-      flex: 1 1 180px;
-      min-width: 160px;
-      padding: 16px;
-      border-radius: 16px;
-      border: 1px solid var(--line);
-      background: linear-gradient(180deg, rgba(20, 25, 39, 0.95), rgba(12, 16, 25, 0.98));
-    }
-
-    .metric strong {
-      display: block;
-      font-size: 30px;
-      margin-bottom: 4px;
-    }
-
-    .metric span {
-      color: var(--muted);
+      font-weight: 700;
       font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
     }
-
-    .tabbar {
-      display: flex;
-      gap: 4px;
-      padding: 6px;
-      margin-bottom: 16px;
-      overflow-x: auto;
-    }
-
-    .tab {
-      padding: 10px 15px;
-      cursor: pointer;
-      font-size: 13px;
-      color: var(--muted);
-      user-select: none;
-      white-space: nowrap;
-      transition: 0.15s ease;
-    }
-
-    .tab.active {
-      color: var(--text);
-      border-color: rgba(106, 163, 255, 0.38);
-      background: linear-gradient(180deg, rgba(20, 30, 54, 0.98), rgba(11, 17, 30, 0.98));
-    }
-
-    .view {
-      display: none;
-    }
-
-    .view.active {
-      display: block;
-    }
-
-    .grid,
-    .agent-grid,
-    .publish-grid,
-    .folder-grid {
+    .meta {
       display: grid;
       gap: 14px;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
     }
-
+    .metric {
+      padding: 16px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.02);
+    }
+    .metric strong {
+      display: block;
+      font-size: 28px;
+      margin-top: 6px;
+    }
+    .metric.warn strong { color: var(--warn); }
+    .metric.danger strong { color: var(--danger); }
     .grid {
-      grid-template-columns: 1.2fr 0.8fr;
+      display: grid;
+      gap: 16px;
+      grid-template-columns: 1.15fr 0.85fr;
       margin-bottom: 16px;
     }
-
-    .agent-grid {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+    .stack {
+      display: grid;
+      gap: 16px;
     }
-
-    .publish-grid {
-      grid-template-columns: 1.2fr 0.8fr;
-    }
-
-    .folder-grid {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
-
     .panel {
       padding: 18px;
-      margin-bottom: 16px;
     }
-
-    .panel h2,
-    .panel h3 {
-      margin: 0 0 8px;
-    }
-
-    .section-kicker {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 5px 10px;
-      border-radius: 999px;
-      background: rgba(106, 163, 255, 0.1);
-      color: var(--brand);
-      font-size: 11px;
-      font-weight: 700;
-      margin-bottom: 10px;
-    }
-
-    .section-desc {
-      margin: 0 0 14px;
-      color: var(--muted);
-      line-height: 1.68;
-      font-size: 14px;
-    }
-
-    .flow-list,
-    .summary-list,
-    .agent-card ul,
-    .folder-card ul {
-      margin: 0;
-      padding-left: 18px;
-      color: var(--muted);
-      line-height: 1.72;
-      font-size: 14px;
-    }
-
-    .stage-card,
-    .agent-card,
-    .folder-card,
-    .pipeline-node,
-    .signal-card {
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      background: rgba(20, 25, 39, 0.95);
-    }
-
-    .flow-stack,
-    .signal-stack {
-      display: grid;
-      gap: 10px;
-    }
-
-    .stage-card,
-    .signal-card {
-      padding: 16px;
-    }
-
-    .stage-top,
-    .signal-top,
-    .folder-card h3 {
+    .chip-row {
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
+      gap: 8px;
+      flex-wrap: wrap;
     }
-
-    .status-pill {
-      padding: 4px 10px;
-      font-size: 10px;
-      color: var(--brand);
-      border-color: rgba(106, 163, 255, 0.28);
+    .chip {
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(102,179,255,0.25);
+      background: rgba(102,179,255,0.1);
+      color: var(--text);
+      font-size: 12px;
     }
-
-    .status-pill.warn {
-      color: var(--warn);
-      border-color: rgba(246, 196, 69, 0.25);
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
     }
-
-    .status-pill.ok {
-      color: var(--ok);
-      border-color: rgba(46, 204, 138, 0.24);
+    td {
+      border-top: 1px solid var(--line);
+      padding: 10px 8px;
+      vertical-align: top;
+      color: var(--text);
     }
-
-    .mini-tags {
-      margin-top: 12px;
-    }
-
-    .mini-tag {
-      padding: 5px 10px;
-      font-size: 11px;
+    .empty {
+      margin: 0;
       color: var(--muted);
     }
-
-    .pipeline {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 12px;
-    }
-
-    .pipeline-node {
-      padding: 16px;
-      position: relative;
-      min-height: 160px;
-    }
-
-    .pipeline-node::after {
-      content: "→";
-      position: absolute;
-      right: -11px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--brand);
-      font-size: 24px;
-      font-weight: 700;
-    }
-
-    .pipeline-node:last-child::after {
-      content: "";
-    }
-
-    .agent-card,
-    .folder-card {
-      padding: 16px;
-      min-height: 210px;
-    }
-
-    .folder-card {
-      min-height: 180px;
-    }
-
-    .folder-code {
-      color: var(--brand);
-      font-size: 11px;
+    .alert-card {
+      padding: 14px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,109,133,0.26);
+      background: rgba(255,109,133,0.08);
       margin-bottom: 10px;
-      font-weight: 700;
-      letter-spacing: 0.03em;
     }
-
-    .insight {
-      margin-top: 10px;
-      padding: 14px 16px;
-      border-radius: 14px;
-      border: 1px solid rgba(46, 204, 138, 0.18);
-      background: rgba(46, 204, 138, 0.08);
-      color: #bff3d7;
-      line-height: 1.7;
-      font-size: 14px;
+    .alert-card:last-child { margin-bottom: 0; }
+    .alert-card strong {
+      display: block;
+      margin-bottom: 4px;
+      color: #ffd6de;
     }
-
-    @media (max-width: 1180px) {
-      .grid,
-      .publish-grid,
-      .agent-grid,
-      .folder-grid,
-      .pipeline {
-        grid-template-columns: 1fr;
-      }
-
-      .pipeline-node::after {
-        content: "↓";
-        right: 50%;
-        top: auto;
-        bottom: -18px;
-        transform: translateX(50%);
-      }
-
-      .pipeline-node:last-child::after {
-        content: "";
-      }
+    .section-desc {
+      margin: 0 0 12px;
+      color: var(--muted);
+    }
+    @media (max-width: 1024px) {
+      .grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
-  <main class="shell">
+  <div class="shell">
     <section class="hero">
       <div class="hero-top">
         <div>
-          <div class="logo">同程产品工作台 · 总控台</div>
-          <h1>参考 edict 的总控式设计，但服务你的真实产品工作流</h1>
-          <p>
-            我借用了它最值得学的部分：总览页、页签切换、指标芯片、角色面板、链路分层。
-            但没有照搬它的古风叙事，而是把它翻译成适合你日常使用的产品工作台。
-            对你来说，这个页面应该是信息输入和信息输出的集合面板，而不是静态说明书。
-            但它不是主命令入口，主命令入口应该放在企业微信里。
-          </p>
+          <div class="brand">Tongcheng Workbench</div>
+          <h1>同程产品工作台总控台</h1>
+          <p class="muted">这不是纯说明页了，而是当前工作台的可视化前台。你可以在这里看数据告警、待办、文档状态、反馈池和版本进展。</p>
         </div>
-        <div class="brand-mark">
-          <div>参考对象：`cft0808/edict`</div>
-          <div>当前形态：工作总控 + 发布中枢 + 归档视图</div>
-          <div>交付形态：HTML 在线网页优先，可再封装桌面 App</div>
-        </div>
+        <div class="muted">更新时间：2026-03-15T20:36:48</div>
       </div>
-      <div class="chip-row">
-        <span class="chip brand">企业微信主命令入口</span>
-        <span class="chip brand">主控 PM 调度</span>
-        <span class="chip ok">Notion 归档已嵌入</span>
-        <span class="chip">邮件订阅拉数</span>
-        <span class="chip">DOCX / 飞书中间稿</span>
-        <span class="chip">Wiki 手工发布</span>
-        <span class="chip">广告实验 + 微信活动 + 平台接入</span>
-        <span class="chip">每日作战使用飞书能力</span>
-      </div>
-      <div class="metric-row">
-        <div class="metric">
-          <strong>2</strong>
-          <span>主链路：业务执行链 / 数据实验链</span>
-        </div>
-        <div class="metric">
-          <strong>8</strong>
-          <span>角色：主控 + 7 个专项 Agent</span>
-        </div>
-        <div class="metric">
-          <strong>4</strong>
-          <span>发布层：本地 / Notion / 中间稿 / Wiki</span>
-        </div>
-        <div class="metric">
-          <strong>1</strong>
-          <span>主命令入口：企业微信</span>
-        </div>
+      <div class="meta">
+        <div class="metric"><span>最近命令</span><strong>0</strong></div>
+        <div class="metric"><span>文档数量</span><strong>0</strong></div>
+        <div class="metric"><span>打开待办</span><strong>0</strong></div>
+        <div class="metric danger"><span>数据告警</span><strong>2</strong></div>
+        <div class="metric"><span>反馈池</span><strong>0</strong></div>
       </div>
     </section>
 
-    <nav class="tabbar" aria-label="工作台视图">
-      <div class="tab active" data-view="overview">总览</div>
-      <div class="tab" data-view="business">业务执行链</div>
-      <div class="tab" data-view="experiment">数据实验链</div>
-      <div class="tab" data-view="publish">发布链路</div>
-      <div class="tab" data-view="agents">Agent 图谱</div>
-      <div class="tab" data-view="folders">目录职责</div>
-    </nav>
+    <div class="grid">
+      <div class="stack">
+        <section class="panel">
+          <h2>数据告警</h2>
+          <p class="section-desc">这里放广告实验、流量波动、关键指标异常下降等需要优先处理的信号。</p>
+          <div class='alert-card'><strong>test alert</strong><div class='muted'>级别：high · 状态：open</div><div>detail</div></div><div class='alert-card'><strong>机票实验转化率异常下降</strong><div class='muted'>级别：high · 状态：open</div><div>需要今天排查投放链路</div></div>
+        </section>
 
-    <section class="view active" id="overview">
-      <div class="grid">
-        <article class="panel">
-          <span class="section-kicker">参考结论</span>
-          <h2>这个项目的架构值得参考，但要学“总控台感”，不是学它的角色设定</h2>
-          <p class="section-desc">
-            `edict` 真正强的地方是把复杂协作拆成可以观察、可以切换、可以解释的面板。
-            这跟你的工作非常契合，因为你每天面对的不是单一 PRD，而是需求、实验、分析、归档、发布并行。
-          </p>
-          <ul class="summary-list">
-            <li>可参考：页签式总览、角色面板、链路分层、状态芯片、总控视角。</li>
-            <li>要改造：它是“多 Agent 指挥台”，你这里更像“产品工作与文档发布中枢”。</li>
-            <li>不建议照搬：古风命名、过强的剧情化叙事、偏工程任务流的语义。</li>
-            <li>你的总控台必须同时容纳输入和输出，而不是只展示“当前有哪些文档”。</li>
-            <li>但命令入口不该放在这里，而该放在企业微信。</li>
-          </ul>
-          <div class="insight">
-            你最应该借的是它那种“我一打开就知道系统在怎么运转”的感觉。这对你这种多线并行、容易被新问题拽走注意力的工作状态特别有帮助。
-          </div>
-        </article>
-        <article class="panel">
-          <span class="section-kicker">已落地</span>
-          <h2>我们已经把它翻译成你的版本</h2>
-          <div class="signal-stack">
-            <div class="signal-card">
-              <div class="signal-top">
-                <h3>总控式视觉</h3>
-                <span class="status-pill ok">已采用</span>
-              </div>
-              <p class="section-desc">深色中控台、顶部指标、页签切换、卡片化信息区，参考了 edict 的阅读体验。</p>
-            </div>
-            <div class="signal-card">
-              <div class="signal-top">
-                <h3>你的业务语义</h3>
-                <span class="status-pill ok">已保留</span>
-              </div>
-              <p class="section-desc">没有把你改造成“任务工厂”，而是保留广告实验、微信生态、平台接入、Notion 归档的真实工作语言。</p>
-            </div>
-            <div class="signal-card">
-              <div class="signal-top">
-                <h3>发布中枢</h3>
-                <span class="status-pill warn">重点强化</span>
-              </div>
-              <p class="section-desc">这是 edict 没那么强、但你特别需要的一层：Notion 到 DOCX / 飞书再到 Wiki 的中间发布流。</p>
-            </div>
-            <div class="signal-card">
-              <div class="signal-top">
-                <h3>输入网关</h3>
-                <span class="status-pill ok">已明确</span>
-              </div>
-              <p class="section-desc">数据看板通过邮件订阅拉取，每日作战再调用飞书能力，命令入口走企业微信，其余事项尽量在总控台内闭环。</p>
-            </div>
-          </div>
-        </article>
+        <section class="panel">
+          <h2>待办池</h2>
+          <p class="section-desc">早期先用单池模式收口，后续再按专项拆分。</p>
+          <p class='empty'>暂无待办</p>
+        </section>
+
+        <section class="panel">
+          <h2>文档状态</h2>
+          <p class="section-desc">这里看飞书草稿、修订中、已定稿的文档状态。</p>
+          <p class='empty'>暂无文档记录</p>
+        </section>
       </div>
-    </section>
 
-    <section class="view" id="business">
-      <article class="panel">
-        <span class="section-kicker">业务执行链</span>
-        <h2>从 PDF / 长图 / 飞书导出，到 PRD / 中间稿 / Wiki 发布</h2>
-        <p class="section-desc">这条链最像你的日常主战场，解决的是需求如何被看懂、被结构化、被写成产品文档、最后稳定发布。</p>
-        <div class="flow-stack">
-          <section class="stage-card">
-            <div class="stage-top">
-              <h3>0. 企业微信下命令</h3>
-              <span class="status-pill ok">主入口</span>
-            </div>
-            <p class="section-desc">你直接在企业微信里下命令给主控层，而不是先打开总控台页面再派任务。</p>
-            <div class="mini-tags">
-              <span class="mini-tag">读 Notion 链接</span>
-              <span class="mini-tag">读飞书链接</span>
-              <span class="mini-tag">指定 deadline</span>
-              <span class="mini-tag">接收通知</span>
-            </div>
-          </section>
-          <section class="stage-card">
-            <div class="stage-top">
-              <h3>1. 输入收敛</h3>
-              <span class="status-pill">00_inbox</span>
-            </div>
-            <p class="section-desc">PDF、长图、共享文档导出、微信摘录先统一进收件区，避免信息散落。</p>
-            <div class="mini-tags">
-              <span class="mini-tag">PDF</span>
-              <span class="mini-tag">长图转 PDF</span>
-              <span class="mini-tag">飞书导出</span>
-              <span class="mini-tag">聊天摘录</span>
-            </div>
-          </section>
-          <section class="stage-card">
-            <div class="stage-top">
-              <h3>2. 转写与结构化</h3>
-              <span class="status-pill">01_intake</span>
-            </div>
-            <p class="section-desc">先转成可读内容，再补成结构化需求卡片，而不是直接开始写 PRD。</p>
-          </section>
-          <section class="stage-card">
-            <div class="stage-top">
-              <h3>3. 专项产出</h3>
-              <span class="status-pill ok">03/04 区域</span>
-            </div>
-            <p class="section-desc">微信活动进 PRD，平台接入进方案，必要时再补视觉说明与页面验收。</p>
-          </section>
-          <section class="stage-card">
-            <div class="stage-top">
-              <h3>4. Notion 归档</h3>
-              <span class="status-pill brand">知识层</span>
-            </div>
-            <p class="section-desc">保留卡片、版本记录、过程结论和关联关系，不把 Notion 当最终发布层。</p>
-          </section>
-          <section class="stage-card">
-            <div class="stage-top">
-              <h3>5. 中间发布与 Wiki</h3>
-              <span class="status-pill warn">最终收口</span>
-            </div>
-            <p class="section-desc">导出为 DOCX / 飞书中间稿 / Wiki 中间稿，再人工发到公司 Wiki。</p>
-          </section>
-        </div>
-      </article>
-    </section>
+      <div class="stack">
+        <section class="panel">
+          <h2>当前能力现状</h2>
+          <div class="chip-row"><div class='chip'>feishu_entry：ready</div><div class='chip'>feishu_doc_draft：ready</div><div class='chip'>revision_loop：ready</div><div class='chip'>notion_archive：manual-finalize</div><div class='chip'>daily_ops_panel：planned</div><div class='chip'>data_alerts：basic-ready</div><div class='chip'>enterprise_wecom_entry：deferred</div></div>
+        </section>
 
-    <section class="view" id="experiment">
-      <article class="panel">
-        <span class="section-kicker">数据实验链</span>
-        <h2>这条链借鉴了 edict 的“状态流”和“角色协同”设计</h2>
-        <p class="section-desc">它不是单纯跑 SQL，而是把目标、实验、预算、回收、复盘放在同一张图里看。数据看板订阅会先通过邮件进入总控台，再被拆进实验链。</p>
-        <div class="flow-stack">
-          <section class="stage-card">
-            <div class="stage-top">
-              <h3>0. 邮件订阅拉数</h3>
-              <span class="status-pill ok">输入网关</span>
-            </div>
-            <p class="section-desc">你已经配置好的数据看板订阅，作为稳定输入源先进入邮箱，再由总控台收件、归类、提取异常信号。</p>
-            <div class="mini-tags">
-              <span class="mini-tag">邮件订阅</span>
-              <span class="mini-tag">看板快照</span>
-              <span class="mini-tag">异常识别</span>
-            </div>
-          </section>
-          <section class="stage-card">
-            <div class="stage-top">
-              <h3>目标与假设</h3>
-              <span class="status-pill">实验前</span>
-            </div>
-            <p class="section-desc">先写清转化、留存、补贴、人群、场景和停止条件。</p>
-          </section>
-          <section class="stage-card">
-            <div class="stage-top">
-              <h3>实验设计</h3>
-              <span class="status-pill">实验中</span>
-            </div>
-            <p class="section-desc">实验设计 Agent 负责方案骨架，避免你边想边改导致口径混乱。</p>
-          </section>
-          <section class="stage-card">
-            <div class="stage-top">
-              <h3>SQL 与拉数</h3>
-              <span class="status-pill">数据中</span>
-            </div>
-            <p class="section-desc">数据工程师补 SQL、口径和临时视图，服务 T+1 和局部实时需求。</p>
-          </section>
-          <section class="stage-card">
-            <div class="stage-top">
-              <h3>结果分析与预算</h3>
-              <span class="status-pill ok">分析中</span>
-            </div>
-            <p class="section-desc">商业分析师输出归因、预算建议、继续还是止损。</p>
-          </section>
-          <section class="stage-card">
-            <div class="stage-top">
-              <h3>复盘与告警</h3>
-              <span class="status-pill warn">闭环</span>
-            </div>
-            <p class="section-desc">实验复盘、日报、异常告警统一沉淀，形成下一轮实验的输入。</p>
-          </section>
-        </div>
-      </article>
-    </section>
+        <section class="panel">
+          <h2>版本规划</h2>
+          <div class="chip-row"><div class='chip'>1.0：飞书主入口 + 飞书草稿 + 定稿后归档</div><div class='chip'>1.1：多轮修改闭环与定稿指令</div><div class='chip'>1.2：待办、版本、能力现状与助手状态视图</div><div class='chip'>1.3：反馈收集与周末迭代输入链路</div></div>
+        </section>
 
-    <section class="view" id="publish">
-      <div class="publish-grid">
-        <article class="panel">
-          <span class="section-kicker">发布链路</span>
-          <h2>这部分是你工作台最该有、edict 只是启发的地方</h2>
-          <p class="section-desc">你真正的痛点不是有没有 Agent，而是“文档能不能稳定地走完最后一公里”。每日作战会使用飞书能力，其余内容尽量在总控台中处理和输出，但消息回流优先走企业微信。</p>
-          <div class="pipeline">
-            <section class="pipeline-node">
-              <h3>企业微信</h3>
-              <p class="section-desc">命令入口与通知回流入口。你在这里下命令，也在这里收到提醒和结果。</p>
-            </section>
-            <section class="pipeline-node">
-              <h3>本地工作台</h3>
-              <p class="section-desc">OCR、卡片、PRD、实验表、Wiki 中间稿都先在这里加工。</p>
-            </section>
-            <section class="pipeline-node">
-              <h3>Notion</h3>
-              <p class="section-desc">知识库、版本库、归档库，保存过程和索引。</p>
-            </section>
-            <section class="pipeline-node">
-              <h3>DOCX / 飞书</h3>
-              <p class="section-desc">中间发布层，适合评审、润色、发布前排版检查。</p>
-            </section>
-          </div>
-          <div class="insight">最终成稿再由飞书中间稿进入公司 Wiki，这一步保留人工把关。</div>
-        </article>
-        <article class="panel">
-          <span class="section-kicker">借鉴点</span>
-          <h2>我们从 edict 里实际借了什么</h2>
-          <ul class="summary-list">
-            <li>顶部 KPI 和状态芯片，让你先看整体健康度。</li>
-            <li>页签式视图，避免所有信息挤在一页上。</li>
-            <li>卡片化角色和链路节点，支持扫读。</li>
-            <li>总控台语言，而不是普通文档页语言。</li>
-            <li>把页面当成输入输出面板，而不是文件陈列柜。</li>
-          </ul>
-          <div class="insight">
-            对你来说，最重要的不是“酷”，而是“我一眼知道我的工作现在卡在哪一层”。这个设计方向是对的。
-          </div>
-        </article>
+        <section class="panel">
+          <h2>反馈池</h2>
+          <p class="section-desc">工作日先在这里收口问题，周末集中做迭代。</p>
+          <p class='empty'>暂无反馈</p>
+        </section>
+
+        <section class="panel">
+          <h2>最近命令</h2>
+          <p class='empty'>暂无命令记录</p>
+        </section>
       </div>
-    </section>
-
-    <section class="view" id="agents">
-      <article class="panel">
-        <span class="section-kicker">Agent 图谱</span>
-        <h2>这里借鉴的是 edict 的“角色面板”，但语义换成你的工作角色</h2>
-        <div class="agent-grid">
-          <article class="agent-card">
-            <h3>主控 PM</h3>
-            <ul>
-              <li>判断任务类型、阶段和优先级</li>
-              <li>决定分发到哪条主链路</li>
-              <li>统一回收下一步动作</li>
-            </ul>
-          </article>
-          <article class="agent-card">
-            <h3>商业分析师</h3>
-            <ul>
-              <li>目标拆解、预算建议、结果归因</li>
-              <li>输出增长判断和实验复盘</li>
-              <li>补竞品和行业洞察</li>
-            </ul>
-          </article>
-          <article class="agent-card">
-            <h3>数据工程师</h3>
-            <ul>
-              <li>负责 SQL、数据口径、明细提取</li>
-              <li>服务 T+1 和局部实时场景</li>
-              <li>提供异常说明和数据视图</li>
-            </ul>
-          </article>
-          <article class="agent-card">
-            <h3>实验设计</h3>
-            <ul>
-              <li>负责假设、分群、补贴策略</li>
-              <li>定义观测指标和停止条件</li>
-              <li>让实验设计更稳</li>
-            </ul>
-          </article>
-          <article class="agent-card">
-            <h3>增长 / 活动产品</h3>
-            <ul>
-              <li>承接微信生态和活动需求</li>
-              <li>产出完整 PRD 与页面说明</li>
-              <li>补视觉、规则和依赖</li>
-            </ul>
-          </article>
-          <article class="agent-card">
-            <h3>平台产品</h3>
-            <ul>
-              <li>处理外部接入和接口文档</li>
-              <li>识别内部依赖和技术缺口</li>
-              <li>输出接入方案和风险</li>
-            </ul>
-          </article>
-          <article class="agent-card">
-            <h3>每日作战助手</h3>
-            <ul>
-              <li>管理告警、待办和 deadline</li>
-              <li>推送竞品和行业摘要</li>
-              <li>帮助收口注意力</li>
-            </ul>
-          </article>
-          <article class="agent-card">
-            <h3>Notion 工作台</h3>
-            <ul>
-              <li>沉淀卡片、PRD、实验和日报</li>
-              <li>保留版本、来源和关联关系</li>
-              <li>准备 Wiki 发布中间稿</li>
-            </ul>
-          </article>
-        </div>
-      </article>
-    </section>
-
-    <section class="view" id="folders">
-      <article class="panel">
-        <span class="section-kicker">目录职责</span>
-        <h2>文件夹仍然存在，但它们只是地图上的区域，不再是唯一入口</h2>
-        <div class="folder-grid">
-          <article class="folder-card">
-            <div class="folder-code">输入网关</div>
-            <h3>企业微信 / 邮件 / 飞书入口</h3>
-            <ul>
-              <li>企业微信承接命令输入</li>
-              <li>邮件订阅拉数据看板</li>
-              <li>飞书主要留给每日作战与提醒</li>
-              <li>其他输入尽量汇总进总控台</li>
-            </ul>
-          </article>
-          <article class="folder-card">
-            <div class="folder-code">00_inbox / 01_intake</div>
-            <h3>输入与转写区</h3>
-            <ul>
-              <li>收原始材料</li>
-              <li>放 OCR 与结构化卡片</li>
-              <li>是所有任务的起点</li>
-            </ul>
-          </article>
-          <article class="folder-card">
-            <div class="folder-code">02 / 03 / 04</div>
-            <h3>业务处理区</h3>
-            <ul>
-              <li>广告实验</li>
-              <li>微信生态与活动</li>
-              <li>多平台接入</li>
-            </ul>
-          </article>
-          <article class="folder-card">
-            <div class="folder-code">05 / 06 / 07</div>
-            <h3>作战与输出区</h3>
-            <ul>
-              <li>每日作战和告警</li>
-              <li>模板库</li>
-              <li>正式导出产物</li>
-            </ul>
-          </article>
-          <article class="folder-card">
-            <div class="folder-code">08_dashboard</div>
-            <h3>总控与全景区</h3>
-            <ul>
-              <li>看全局，不只看单个文件</li>
-              <li>适合每天开工和收工时使用</li>
-              <li>也是以后继续升级的首页</li>
-            </ul>
-          </article>
-        </div>
-      </article>
-    </section>
-  </main>
-
-  <script>
-    const tabs = document.querySelectorAll('.tab');
-    const views = document.querySelectorAll('.view');
-    tabs.forEach((tab) => {
-      tab.addEventListener('click', () => {
-        const id = tab.dataset.view;
-        tabs.forEach((item) => item.classList.toggle('active', item === tab));
-        views.forEach((view) => view.classList.toggle('active', view.id === id));
-      });
-    });
-  </script>
+    </div>
+  </div>
 </body>
 </html>

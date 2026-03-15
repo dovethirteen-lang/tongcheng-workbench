@@ -87,7 +87,15 @@ cd D:\CodeX\工作流设计\同程产品工作台
 py .\scripts\validate_feishu_app.py
 py .\scripts\run_feishu_longconn.py --log-level INFO
 py .\scripts\render_workbench_status.py
+py .\scripts\render_feishu_frontend.py
 py .\scripts\smoke_test.py
+```
+
+飞书前台预览：
+
+```powershell
+cd D:\CodeX\工作流设计\同程产品工作台
+.\scripts\start_feishu_frontend.ps1
 ```
 
 ## 常见命令示例

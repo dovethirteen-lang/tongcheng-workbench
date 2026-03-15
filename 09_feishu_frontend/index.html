@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>同程产品工作台 · 飞书前台</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Feishu Workbench Preview</p>
+        <h1>同程产品工作台</h1>
+        <p class="hero-copy">面向飞书工作台的每日作战首页。它优先承接你真正会看的内容：数据告警、待办、文档状态、反馈池和版本进展。</p>
+      </div>
+      <div class="hero-side">
+        <div class="hero-pill" id="updatedAt">更新时间 -</div>
+        <div class="quick-actions">
+          <button type="button">新建需求卡片</button>
+          <button type="button">生成 PRD 草稿</button>
+          <button type="button">查看数据告警</button>
+        </div>
+      </div>
+    </header>
+
+    <section class="metrics" id="metrics"></section>
+
+    <main class="layout">
+      <section class="panel alert-panel">
+        <div class="panel-head">
+          <div>
+            <p class="panel-kicker danger">Priority Lane</p>
+            <h2>数据告警</h2>
+          </div>
+          <span class="badge danger" id="alertCount">0</span>
+        </div>
+        <div id="alertList" class="stack"></div>
+      </section>
+
+      <section class="column">
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="panel-kicker">Single Pool</p>
+              <h2>待办池</h2>
+            </div>
+            <span class="badge" id="todoCount">0</span>
+          </div>
+          <div id="todoList" class="table-wrap"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="panel-kicker">Document Flow</p>
+              <h2>文档状态</h2>
+            </div>
+            <span class="badge" id="docCount">0</span>
+          </div>
+          <div id="docList" class="table-wrap"></div>
+        </section>
+      </section>
+
+      <section class="column">
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="panel-kicker">Current Status</p>
+              <h2>能力现状</h2>
+            </div>
+          </div>
+          <div id="capabilityList" class="chip-wrap"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="panel-kicker">Release Track</p>
+              <h2>版本规划</h2>
+            </div>
+          </div>
+          <div id="releaseList" class="stack compact"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="panel-kicker">Feedback Inbox</p>
+              <h2>反馈池</h2>
+            </div>
+            <span class="badge" id="feedbackCount">0</span>
+          </div>
+          <div id="feedbackList" class="table-wrap"></div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>
