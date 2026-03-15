@@ -31,7 +31,35 @@ def main() -> None:
 
     output = data_dir / "workbench.json"
     output.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(json.dumps({"ok": True, "output": str(output)}, ensure_ascii=False, indent=2))
+
+    summary_output = data_dir / "workbench-summary.json"
+    summary_output.write_text(
+        json.dumps(
+            {
+                "updated_at": payload["updated_at"],
+                "alert_count": len([item for item in payload["alerts"] if item.get("status") == "open"]),
+                "todo_count": len([item for item in payload["todos"] if item.get("status") == "open"]),
+                "feedback_count": len(payload["feedback"]),
+                "document_count": len(payload["documents"]),
+                "top_alert": payload["alerts"][0] if payload["alerts"] else None,
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    print(
+        json.dumps(
+            {
+                "ok": True,
+                "output": str(output),
+                "summary_output": str(summary_output),
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+    )
 
 
 if __name__ == "__main__":
