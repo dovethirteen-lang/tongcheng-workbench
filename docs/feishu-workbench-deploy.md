@@ -58,9 +58,26 @@ cd D:\CodeX\工作流设计\同程产品工作台
 .\scripts\start_feishu_frontend.ps1
 ```
 
-3. 之后将 `09_feishu_frontend` 部署到可访问的静态站点
+3. 构建可发布静态站点
 
-4. 在飞书工作台中创建应用，把主页地址指向部署后的 URL
+```powershell
+cd D:\CodeX\工作流设计\同程产品工作台
+py .\scripts\build_feishu_frontend_release.py
+```
+
+构建产物会输出到：
+
+- `site/feishu-workbench`
+
+4. 将 `site/feishu-workbench` 部署到可访问的静态站点
+
+当前仓库已经补了 GitHub Pages 工作流：
+
+- `.github/workflows/deploy-feishu-workbench.yml`
+
+5. 在 GitHub 仓库里启用 Pages 后，就可以拿到一个公开 URL
+
+6. 在飞书工作台中创建应用，把主页地址指向部署后的 URL
 
 ## 设计原则
 
@@ -68,3 +85,12 @@ cd D:\CodeX\工作流设计\同程产品工作台
 - 文档协作仍然在飞书云文档
 - 归档仍然在 Notion
 - 后台命令处理仍然在主控服务
+
+## 当前最短落地路径
+
+1. 用当前仓库生成前台数据和静态站点
+2. 用 GitHub Pages 暴露一个可访问 URL
+3. 在飞书工作台里创建自建应用
+4. 把应用主页配置到该 URL
+
+这样你就能先以最低成本把这套前台挂进飞书工作台。

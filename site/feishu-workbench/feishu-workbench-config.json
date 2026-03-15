@@ -1,0 +1,24 @@
+{
+  "app_name": "同程产品工作台",
+  "frontend_type": "embedded_web_app",
+  "entry_file": "index.html",
+  "data_file": "data/workbench.json",
+  "recommended_sections": [
+    "数据告警",
+    "待办池",
+    "文档状态",
+    "能力现状",
+    "版本规划",
+    "反馈池"
+  ],
+  "quick_actions": [
+    "新建需求卡片",
+    "生成 PRD 草稿",
+    "查看数据告警"
+  ],
+  "deployment_notes": [
+    "当前为飞书工作台前台骨架，后续迁移到飞书工作台应用时保留同一数据结构。",
+    "推荐将该前端部署到可访问的静态站点，再把地址配置到飞书工作台应用主页。",
+    "命令入口仍由飞书消息应用承担，工作台前台只负责查看状态与快捷触发。"
+  ]
+}

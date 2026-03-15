@@ -1,0 +1,47 @@
+name: Deploy Feishu Workbench Frontend
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - codex/v1.0
+    paths:
+      - "09_feishu_frontend/**"
+      - "scripts/render_feishu_frontend.py"
+      - "scripts/build_feishu_frontend_release.py"
+      - "runtime/**"
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build static site
+        run: python scripts/build_feishu_frontend_release.py
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
