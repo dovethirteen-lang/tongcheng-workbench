@@ -37,6 +37,56 @@
 
     <section class="metrics" id="metrics"></section>
 
+    <section class="panel composer-panel" id="composerSection">
+      <div class="panel-head">
+        <div>
+          <p class="panel-kicker">Quick Intake</p>
+          <h2>快速录入台</h2>
+        </div>
+      </div>
+      <div class="composer-grid">
+        <label class="field">
+          <span>业务线</span>
+          <select id="composerLane">
+            <option value="wechat_growth">微信流量提效</option>
+            <option value="ads_experiment">广告专项</option>
+            <option value="platform_integration">多平台项目</option>
+            <option value="daily_ops">每日作战</option>
+            <option value="general">通用事项</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>动作类型</span>
+          <select id="composerAction">
+            <option value="requirement_card">需求卡片</option>
+            <option value="prd_draft">PRD 草稿</option>
+            <option value="analysis">分析/方案</option>
+            <option value="todo">待办</option>
+            <option value="feedback">反馈</option>
+            <option value="alert">数据告警</option>
+            <option value="finalize">确定定稿</option>
+          </select>
+        </label>
+        <label class="field field-wide">
+          <span>资料链接 / 路径</span>
+          <input id="composerLink" type="text" placeholder="粘贴 Notion、飞书、共享文档或本地目录">
+        </label>
+        <label class="field">
+          <span>截止时间</span>
+          <input id="composerDeadline" type="text" placeholder="例如：今天 17:00 前">
+        </label>
+        <label class="field field-wide">
+          <span>补充说明</span>
+          <textarea id="composerNotes" placeholder="补充背景、目标、阻塞点、期望产出"></textarea>
+        </label>
+      </div>
+      <div class="composer-actions">
+        <button type="button" id="btnGenerateCommand">生成标准命令</button>
+        <button type="button" class="ghost" id="btnUseGenerated">放入弹窗继续处理</button>
+      </div>
+      <textarea id="composerOutput" class="composer-output" readonly placeholder="这里会自动生成可直接发送给飞书助手的标准命令"></textarea>
+    </section>
+
     <main class="layout">
       <section class="panel alert-panel" id="alertSection">
         <div class="panel-head">

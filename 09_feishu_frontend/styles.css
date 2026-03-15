@@ -151,6 +151,71 @@ h2 {
   margin: 18px 0;
 }
 
+.composer-panel {
+  margin-bottom: 18px;
+}
+
+.composer-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+}
+
+.field span {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.field input,
+.field select,
+.composer-output {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: #f8fbff;
+  color: var(--text);
+  font: 14px/1.5 "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+.field-wide {
+  grid-column: 1 / -1;
+}
+
+.composer-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.composer-actions button {
+  border: 0;
+  border-radius: 12px;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.composer-actions .ghost {
+  background: #fff;
+  color: var(--text);
+  border: 1px solid var(--line);
+}
+
+.composer-output {
+  margin-top: 14px;
+  min-height: 140px;
+  resize: vertical;
+}
+
 .metric {
   padding: 16px;
 }
@@ -412,5 +477,9 @@ textarea {
 
   .hero {
     flex-direction: column;
+  }
+
+  .composer-grid {
+    grid-template-columns: 1fr;
   }
 }
