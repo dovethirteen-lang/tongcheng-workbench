@@ -27,8 +27,9 @@ class CommandService:
         text: str,
         source: str = "feishu_longconn",
         reply_target: dict[str, str] | None = None,
+        hints: dict[str, Any] | None = None,
     ) -> tuple[ParsedCommand, Path, Path]:
-        parsed = self.router.parse_command(text=text, source=source)
+        parsed = self.router.parse_command(text=text, source=source, hints=hints)
         command_path = self.router.dump_command(parsed, self.command_log_dir)
         reply_path = self._write_reply(parsed, reply_target=reply_target)
         return parsed, command_path, reply_path

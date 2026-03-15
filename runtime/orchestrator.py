@@ -22,6 +22,8 @@ class ParsedCommand:
     outputs: list[str]
     deadline_hint: str | None
     notify_channel: str
+    lane: str = "general"
+    action: str = "general"
     assumptions: list[str] = field(default_factory=list)
     next_actions: list[str] = field(default_factory=list)
     created_at: str = field(default_factory=lambda: datetime.now().isoformat(timespec="seconds"))
@@ -32,9 +34,10 @@ class CommandRouter:
         self.config_path = config_path
         self._config = json.loads(config_path.read_text(encoding="utf-8"))
 
-    def parse_command(self, text: str, source: str = "feishu") -> ParsedCommand:
+    def parse_command(self, text: str, source: str = "feishu", hints: dict[str, Any] | None = None) -> ParsedCommand:
         normalized = re.sub(r"\s+", " ", text).strip()
         lowered = normalized.lower()
+        hints = hints or {}
         matched_routes: list[dict[str, Any]] = []
         for rule in self._config.get("routing_rules", []):
           for keyword in rule.get("when", []):
@@ -45,6 +48,9 @@ class CommandRouter:
         task_type = self._infer_task_type(matched_routes)
         route_to = self._collect_routes(matched_routes)
         outputs = self._collect_outputs(matched_routes)
+        lane = str(hints.get("lane") or task_type or "general")
+        action = str(hints.get("action") or "general")
+        task_type, route_to, outputs = self._apply_hints(lane, action, task_type, route_to, outputs)
         inputs = self._extract_inputs(normalized)
         deadline_hint = self._extract_deadline(normalized)
         urgency = self._infer_urgency(normalized, deadline_hint)
@@ -70,6 +76,8 @@ class CommandRouter:
             outputs=outputs,
             deadline_hint=deadline_hint,
             notify_channel=notify_channel,
+            lane=lane,
+            action=action,
             assumptions=assumptions,
             next_actions=next_actions,
         )
@@ -111,6 +119,46 @@ class CommandRouter:
                 if output not in seen:
                     seen.append(output)
         return seen
+
+    def _apply_hints(
+        self,
+        lane: str,
+        action: str,
+        task_type: str,
+        route_to: list[str],
+        outputs: list[str],
+    ) -> tuple[str, list[str], list[str]]:
+        lane_task_map = {
+            "wechat_growth": "wechat_growth",
+            "ads_experiment": "ads_experiment",
+            "platform_integration": "platform_integration",
+            "daily_ops": "daily_ops",
+            "general": "general",
+        }
+        task_type = lane_task_map.get(lane, task_type)
+
+        if not route_to or lane != "general":
+            route_to = {
+                "wechat_growth": ["增长/C 端活动产品 Agent"],
+                "ads_experiment": ["实验设计 Agent", "数据工程师 Agent", "商业分析师 Agent"],
+                "platform_integration": ["平台产品 Agent"],
+                "daily_ops": ["每日作战助手 Agent"],
+                "general": ["Orchestrator / 主控 PM"],
+            }.get(lane, route_to or ["Orchestrator / 主控 PM"])
+
+        if action != "general":
+            action_outputs = {
+                "requirement_card": ["需求卡片", "待确认项", "依赖清单"],
+                "prd_draft": ["PRD", "页面结构", "评审稿链接"],
+                "analysis": ["分析结论", "下一步建议", "行动项"],
+                "todo": ["待办记录", "deadline 提醒", "跟进项"],
+                "feedback": ["反馈记录", "修复建议", "迭代输入"],
+                "alert": ["异常告警", "排查动作", "风险提示"],
+                "finalize": ["Notion 归档", "Wiki 中间稿", "发布准备"],
+            }
+            outputs = action_outputs.get(action, outputs or ["结构化任务说明", "下一步动作"])
+
+        return task_type, route_to, outputs
 
     def _extract_inputs(self, text: str) -> list[str]:
         inputs: list[str] = []

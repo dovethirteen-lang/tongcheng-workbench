@@ -1,6 +1,8 @@
 let apiAvailable = false;
 let currentCommandTemplate = "";
 let currentIntent = "";
+let currentLane = "general";
+let currentAction = "general";
 
 async function loadStaticData() {
   const response = await fetch("./data/workbench.json", { cache: "no-store" });
@@ -86,6 +88,69 @@ function renderRelease(obj) {
   return Object.entries(obj)
     .map(([key, value]) => `<div class="release-card"><strong>${escapeHtml(key)}</strong><span>${escapeHtml(value)}</span></div>`)
     .join("");
+}
+
+function buildComposerCommand() {
+  const lane = document.getElementById("composerLane").value;
+  const action = document.getElementById("composerAction").value;
+  const link = document.getElementById("composerLink").value.trim();
+  const deadline = document.getElementById("composerDeadline").value.trim();
+  const notes = document.getElementById("composerNotes").value.trim();
+
+  const laneLabelMap = {
+    wechat_growth: "微信流量提效",
+    ads_experiment: "广告专项",
+    platform_integration: "多平台项目",
+    daily_ops: "每日作战",
+    general: "通用事项",
+  };
+
+  const prefix = `这是一个${laneLabelMap[lane] || "通用事项"}任务。`;
+  const sourceLine = link ? `资料位置：${link}` : "资料位置：待补充";
+  const deadlineLine = deadline ? `截止时间：${deadline}` : "";
+
+  const actionTemplates = {
+    requirement_card: [
+      "请先整理成需求卡片草稿，不要归档。",
+      "输出：背景、目标、用户路径、规则、风险、待确认项。",
+      "完成后把飞书文档链接回给我。",
+    ],
+    prd_draft: [
+      "请按照当前需求卡片生成 PRD 草稿，不要归档。",
+      "PRD 结构按我的 Notion 模板来写。",
+      "完成后把飞书文档链接回给我。",
+    ],
+    analysis: [
+      "请输出结构化分析结果。",
+      "需要给出问题判断、下一步建议和可执行动作。",
+      "如果适合文档化，请生成飞书文档草稿。",
+    ],
+    todo: [
+      "请登记一条新的待办。",
+      "写清事项、阻塞点、回传结果。",
+    ],
+    feedback: [
+      "请记录一条工作台反馈。",
+      "写清问题现象、复现方式、期望结果、优先级。",
+    ],
+    alert: [
+      "请记录一条数据告警。",
+      "写清异常指标、波动情况、初步判断、下一步排查动作。",
+    ],
+    finalize: [
+      "确定定稿。",
+      "请进入 Notion 归档并生成 Wiki 中间稿。",
+    ],
+  };
+
+  const parts = [prefix, sourceLine, ...actionTemplates[action]];
+  if (deadlineLine) {
+    parts.push(deadlineLine);
+  }
+  if (notes) {
+    parts.push(`补充说明：${notes}`);
+  }
+  return parts.filter(Boolean).join("\n");
 }
 
 function renderConfig(data) {
@@ -174,9 +239,11 @@ function showToast(message) {
   showToast.timer = window.setTimeout(() => toast.classList.add("hidden"), 2200);
 }
 
-function openModal(title, command, intent = "") {
+function openModal(title, command, intent = "", lane = "general", action = "general") {
   currentCommandTemplate = command;
   currentIntent = intent;
+  currentLane = lane;
+  currentAction = action;
   document.getElementById("modalTitle").textContent = title;
   document.getElementById("commandText").value = command;
   document.getElementById("commandModal").classList.remove("hidden");
@@ -184,6 +251,8 @@ function openModal(title, command, intent = "") {
 
 function closeModal() {
   currentIntent = "";
+  currentLane = "general";
+  currentAction = "general";
   document.getElementById("commandModal").classList.add("hidden");
 }
 
@@ -278,6 +347,8 @@ async function submitCommand() {
       text,
       source: "workbench_frontend",
       intent: currentIntent || undefined,
+      lane: currentLane || undefined,
+      action: currentAction || undefined,
     }),
   });
 
@@ -307,7 +378,9 @@ function wireActions() {
         "请输出：背景、目标、用户路径、规则、风险、待确认项。",
         "完成后把飞书文档链接回给我。"
       ].join("\n"),
-      "new_card"
+      "new_card",
+      document.getElementById("composerLane")?.value || "general",
+      "requirement_card"
     );
   });
 
@@ -319,7 +392,9 @@ function wireActions() {
         "PRD 结构按我的 Notion 模板来写。",
         "生成到飞书文档，完成后把链接回给我。"
       ].join("\n"),
-      "new_prd"
+      "new_prd",
+      document.getElementById("composerLane")?.value || "general",
+      "prd_draft"
     );
   });
 
@@ -330,6 +405,8 @@ function wireActions() {
         "登记一条新的待办。",
         "请写清：事项、截止时间、当前阻塞点、需要我回传的结果。",
       ].join("\n"),
+      "todo",
+      "daily_ops",
       "todo"
     );
   });
@@ -341,6 +418,8 @@ function wireActions() {
         "记录一条工作台反馈。",
         "请说明：问题现象、复现方式、期望结果、优先级。",
       ].join("\n"),
+      "feedback",
+      "daily_ops",
       "feedback"
     );
   });
@@ -351,6 +430,21 @@ function wireActions() {
   });
 
   document.getElementById("btnReload").addEventListener("click", reloadWorkbench);
+  document.getElementById("btnGenerateCommand").addEventListener("click", () => {
+    document.getElementById("composerOutput").value = buildComposerCommand();
+    showToast("标准命令已生成。");
+  });
+  document.getElementById("btnUseGenerated").addEventListener("click", () => {
+    const text = document.getElementById("composerOutput").value.trim() || buildComposerCommand();
+    document.getElementById("composerOutput").value = text;
+    openModal(
+      "标准命令",
+      text,
+      document.getElementById("composerAction").value,
+      document.getElementById("composerLane").value,
+      document.getElementById("composerAction").value
+    );
+  });
   document.getElementById("btnCopyCommand").addEventListener("click", copyCommand);
   document.getElementById("btnSubmitCommand").addEventListener("click", submitCommand);
   document.getElementById("btnCloseModal").addEventListener("click", closeModal);

@@ -1,6 +1,8 @@
 let apiAvailable = false;
 let currentCommandTemplate = "";
 let currentIntent = "";
+let currentLane = "general";
+let currentAction = "general";
 
 async function loadStaticData() {
   const response = await fetch("./data/workbench.json", { cache: "no-store" });
@@ -237,9 +239,11 @@ function showToast(message) {
   showToast.timer = window.setTimeout(() => toast.classList.add("hidden"), 2200);
 }
 
-function openModal(title, command, intent = "") {
+function openModal(title, command, intent = "", lane = "general", action = "general") {
   currentCommandTemplate = command;
   currentIntent = intent;
+  currentLane = lane;
+  currentAction = action;
   document.getElementById("modalTitle").textContent = title;
   document.getElementById("commandText").value = command;
   document.getElementById("commandModal").classList.remove("hidden");
@@ -247,6 +251,8 @@ function openModal(title, command, intent = "") {
 
 function closeModal() {
   currentIntent = "";
+  currentLane = "general";
+  currentAction = "general";
   document.getElementById("commandModal").classList.add("hidden");
 }
 
@@ -341,6 +347,8 @@ async function submitCommand() {
       text,
       source: "workbench_frontend",
       intent: currentIntent || undefined,
+      lane: currentLane || undefined,
+      action: currentAction || undefined,
     }),
   });
 
@@ -370,7 +378,9 @@ function wireActions() {
         "请输出：背景、目标、用户路径、规则、风险、待确认项。",
         "完成后把飞书文档链接回给我。"
       ].join("\n"),
-      "new_card"
+      "new_card",
+      document.getElementById("composerLane")?.value || "general",
+      "requirement_card"
     );
   });
 
@@ -382,7 +392,9 @@ function wireActions() {
         "PRD 结构按我的 Notion 模板来写。",
         "生成到飞书文档，完成后把链接回给我。"
       ].join("\n"),
-      "new_prd"
+      "new_prd",
+      document.getElementById("composerLane")?.value || "general",
+      "prd_draft"
     );
   });
 
@@ -393,6 +405,8 @@ function wireActions() {
         "登记一条新的待办。",
         "请写清：事项、截止时间、当前阻塞点、需要我回传的结果。",
       ].join("\n"),
+      "todo",
+      "daily_ops",
       "todo"
     );
   });
@@ -404,6 +418,8 @@ function wireActions() {
         "记录一条工作台反馈。",
         "请说明：问题现象、复现方式、期望结果、优先级。",
       ].join("\n"),
+      "feedback",
+      "daily_ops",
       "feedback"
     );
   });
@@ -421,7 +437,13 @@ function wireActions() {
   document.getElementById("btnUseGenerated").addEventListener("click", () => {
     const text = document.getElementById("composerOutput").value.trim() || buildComposerCommand();
     document.getElementById("composerOutput").value = text;
-    openModal("标准命令", text, document.getElementById("composerAction").value);
+    openModal(
+      "标准命令",
+      text,
+      document.getElementById("composerAction").value,
+      document.getElementById("composerLane").value,
+      document.getElementById("composerAction").value
+    );
   });
   document.getElementById("btnCopyCommand").addEventListener("click", copyCommand);
   document.getElementById("btnSubmitCommand").addEventListener("click", submitCommand);

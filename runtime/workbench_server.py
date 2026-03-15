@@ -78,6 +78,8 @@ class WorkbenchRequestHandler(SimpleHTTPRequestHandler):
             text = str(payload.get("text", "")).strip()
             source = str(payload.get("source", "workbench_frontend"))
             intent = str(payload.get("intent", "") or "").strip() or None
+            lane = str(payload.get("lane", "") or "").strip() or None
+            action = str(payload.get("action", "") or "").strip() or None
             if not text:
                 self._send_json({"ok": False, "error": "text is required"}, status=HTTPStatus.BAD_REQUEST)
                 return
@@ -87,11 +89,15 @@ class WorkbenchRequestHandler(SimpleHTTPRequestHandler):
                 reply_target={"source": source},
                 create_remote_artifacts=True,
                 intent=intent,
+                lane=lane,
+                action=action,
             )
             self._send_json(
                 {
                     "ok": True,
                     "intent": intent,
+                    "lane": lane,
+                    "action": action,
                     "command_id": result.parsed.command_id,
                     "summary": result.reply.get("summary", ""),
                     "reply_text": self.pipeline.command_service.format_reply_text(result.reply),

@@ -49,11 +49,14 @@ class TaskPipeline:
         reply_target: dict[str, str] | None = None,
         create_remote_artifacts: bool = True,
         intent: str | None = None,
+        lane: str | None = None,
+        action: str | None = None,
     ) -> TaskPipelineResult:
         parsed, command_path, reply_path = self.command_service.accept_text(
             text=text,
             source=source,
             reply_target=reply_target,
+            hints={"lane": lane, "action": action},
         )
         self.state.record_command(parsed)
         reply = self.command_service.read_reply(reply_path)
