@@ -99,14 +99,23 @@ class CommandService:
         todo = reply.get("todo_item") or {}
         if todo.get("title"):
             lines.extend(["", f"已登记待办：{todo['title']}"])
+        todo_queue = reply.get("todo_queue") or {}
+        if todo_queue.get("path"):
+            lines.extend([f"待办收口：{todo_queue['path']}"])
 
         feedback = reply.get("feedback_item") or {}
         if feedback.get("title"):
             lines.extend(["", f"已记录反馈：{feedback['title']}"])
+        feedback_queue = reply.get("feedback_queue") or {}
+        if feedback_queue.get("path"):
+            lines.extend([f"反馈收口：{feedback_queue['path']}"])
 
         alert = reply.get("alert_item") or {}
         if alert.get("title"):
             lines.extend(["", f"已记录数据告警：{alert['title']}"])
+        alert_queue = reply.get("alert_queue") or {}
+        if alert_queue.get("path"):
+            lines.extend([f"告警收口：{alert_queue['path']}"])
 
         status_page = reply.get("status_page") or {}
         if status_page.get("path"):

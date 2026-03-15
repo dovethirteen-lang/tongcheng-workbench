@@ -56,6 +56,14 @@ class WorkbenchRequestHandler(SimpleHTTPRequestHandler):
                         "记录一条数据告警。",
                         "请写清：异常指标、波动情况、初步判断、下一步排查动作。",
                     ],
+                    "new_todo": [
+                        "登记一条新的待办。",
+                        "请写清：事项、截止时间、当前阻塞点、需要我回传的结果。",
+                    ],
+                    "new_feedback": [
+                        "记录一条工作台反馈。",
+                        "请说明：问题现象、复现方式、期望结果、优先级。",
+                    ],
                 }
             )
             return
@@ -92,7 +100,10 @@ class WorkbenchRequestHandler(SimpleHTTPRequestHandler):
                     "errors": result.reply.get("errors", []),
                     "todo_item": result.reply.get("todo_item"),
                     "feedback_item": result.reply.get("feedback_item"),
+                    "feedback_queue": result.reply.get("feedback_queue"),
                     "alert_item": result.reply.get("alert_item"),
+                    "alert_queue": result.reply.get("alert_queue"),
+                    "todo_queue": result.reply.get("todo_queue"),
                     "state": self.state.snapshot(),
                 }
             )

@@ -15,7 +15,7 @@ from .feishu_docx import (
     should_create_doc_draft,
     create_doc_draft,
 )
-from .notion_archive import enqueue_notion_archive, should_archive_to_notion
+from .notion_archive import enqueue_notion_archive, enqueue_workspace_capture, should_archive_to_notion
 from .orchestrator import ParsedCommand
 from .wiki_handoff import create_wiki_handoff
 from .workbench_state import WorkbenchState
@@ -110,14 +110,17 @@ class TaskPipeline:
         todo_item = self._maybe_capture_todo(parsed)
         if todo_item:
             reply["todo_item"] = todo_item
+            reply["todo_queue"] = {"path": str(enqueue_workspace_capture(self.base_dir, "todo", todo_item))}
 
         feedback_item = self._maybe_capture_feedback(parsed)
         if feedback_item:
             reply["feedback_item"] = feedback_item
+            reply["feedback_queue"] = {"path": str(enqueue_workspace_capture(self.base_dir, "feedback", feedback_item))}
 
         alert_item = self._maybe_capture_alert(parsed)
         if alert_item:
             reply["alert_item"] = alert_item
+            reply["alert_queue"] = {"path": str(enqueue_workspace_capture(self.base_dir, "alert", alert_item))}
 
         if should_archive_to_notion(parsed):
             queue_path = enqueue_notion_archive(self.base_dir, parsed, reply)

@@ -170,6 +170,15 @@ function renderResult(result) {
   if (result.alert_item?.title) {
     parts.push(`<p>已登记数据告警：${escapeHtml(result.alert_item.title)}</p>`);
   }
+  if (result.todo_queue?.path) {
+    parts.push(`<p>待办收口文件：${escapeHtml(result.todo_queue.path)}</p>`);
+  }
+  if (result.feedback_queue?.path) {
+    parts.push(`<p>反馈收口文件：${escapeHtml(result.feedback_queue.path)}</p>`);
+  }
+  if (result.alert_queue?.path) {
+    parts.push(`<p>告警收口文件：${escapeHtml(result.alert_queue.path)}</p>`);
+  }
   node.className = "result-box";
   node.innerHTML = parts.join("") || "<p>已提交主控处理。</p>";
 }
@@ -243,6 +252,26 @@ function wireActions() {
         "按照这个需求卡片生成 PRD 草稿，不要归档。",
         "PRD 结构按我的 Notion 模板来写。",
         "生成到飞书文档，完成后把链接回给我。"
+      ].join("\n")
+    );
+  });
+
+  document.getElementById("btnNewTodo").addEventListener("click", () => {
+    openModal(
+      "登记待办",
+      [
+        "登记一条新的待办。",
+        "请写清：事项、截止时间、当前阻塞点、需要我回传的结果。",
+      ].join("\n")
+    );
+  });
+
+  document.getElementById("btnNewFeedback").addEventListener("click", () => {
+    openModal(
+      "提交反馈",
+      [
+        "记录一条工作台反馈。",
+        "请说明：问题现象、复现方式、期望结果、优先级。",
       ].join("\n")
     );
   });

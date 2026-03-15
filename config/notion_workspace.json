@@ -61,6 +61,38 @@
     "categories": ["bug", "experience_issue", "new_requirement"],
     "notes": "先在 Notion 里收口，后续再功能化到工作台。"
   },
+  "routing_map": {
+    "wechat_growth": {
+      "database": "微信流量提效",
+      "entry_prefix": "微信需求",
+      "stage": "prd_and_requirement"
+    },
+    "ads_experiment": {
+      "database": "广告专项",
+      "entry_prefix": "广告实验",
+      "stage": "experiment_and_analysis"
+    },
+    "platform_integration": {
+      "database": "多平台项目",
+      "entry_prefix": "平台接入",
+      "stage": "integration_plan"
+    },
+    "daily_ops": {
+      "database": "工作分区",
+      "entry_prefix": "每日作战",
+      "stage": "ops_and_alerts"
+    },
+    "knowledge_archive": {
+      "database": "CodeX归档",
+      "entry_prefix": "归档",
+      "stage": "archive"
+    },
+    "general": {
+      "database": "Inbox收件箱",
+      "entry_prefix": "通用事项",
+      "stage": "intake"
+    }
+  },
   "archive_rules": {
     "only_archive_when_finalized": true,
     "finalize_command": "我在飞书中输入“确定定稿”或同义指令",

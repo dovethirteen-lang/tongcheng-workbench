@@ -73,8 +73,13 @@ def is_revision_request(parsed: ParsedCommand) -> bool:
 
 
 def _build_title(parsed: ParsedCommand) -> str:
+    config = load_feishu_config(Path(__file__).resolve().parents[1])
+    strategy = config.get("document_strategy", {})
+    prefixes = strategy.get("title_prefixes", {})
+    prefix = prefixes.get(parsed.task_type, prefixes.get("general", "通用事项"))
+    suffix = strategy.get("review_suffix", "评审稿")
     base = parsed.normalized_text[:28].strip() or parsed.task_type
-    return f"主控草稿｜{base}"
+    return f"{prefix}｜{base}｜{suffix}"
 
 
 def should_create_doc_draft(parsed: ParsedCommand) -> bool:
@@ -123,6 +128,7 @@ def create_doc_draft(base_dir: Path, parsed: ParsedCommand, reply: dict[str, Any
         "title": document.title,
         "url": f"https://feishu.cn/docx/{document_id}",
         "status": "draft",
+        "folder_label": config.get("document_strategy", {}).get("default_folder_label", "默认目录"),
     }
     try:
         _append_blocks(client, document_id, blocks)
