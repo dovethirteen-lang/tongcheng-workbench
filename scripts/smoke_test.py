@@ -22,7 +22,7 @@ def main() -> None:
         source="feishu_longconn",
     )
     revision_command, _, revision_reply_path = service.accept_text(
-        text="按照我的备注修改这个飞书文档 https://feishu.cn/docx/AbCdEf123456 ，补充缺失的图和规则说明。",
+        text="按照我的备注修改这个飞书文档 https://feishu.cn/docx/AbCdEf123456，补充缺失的图和规则说明。",
         source="feishu_longconn",
     )
     final_command, _, final_reply_path = service.accept_text(

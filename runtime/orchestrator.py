@@ -37,10 +37,10 @@ class CommandRouter:
         lowered = normalized.lower()
         matched_routes: list[dict[str, Any]] = []
         for rule in self._config.get("routing_rules", []):
-            for keyword in rule.get("when", []):
-                if keyword.lower() in lowered:
-                    matched_routes.append(rule)
-                    break
+          for keyword in rule.get("when", []):
+              if keyword.lower() in lowered:
+                  matched_routes.append(rule)
+                  break
 
         task_type = self._infer_task_type(matched_routes)
         route_to = self._collect_routes(matched_routes)
