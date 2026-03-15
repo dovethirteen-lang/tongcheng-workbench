@@ -37,7 +37,7 @@ class WorkbenchRequestHandler(SimpleHTTPRequestHandler):
             self._send_json({"ok": True, "mode": "local-api"})
             return
         if parsed.path == "/api/state":
-            self._send_json(self.state.snapshot())
+            self._send_json(self._build_state_payload())
             return
         if parsed.path == "/api/templates":
             self._send_json(
@@ -77,6 +77,7 @@ class WorkbenchRequestHandler(SimpleHTTPRequestHandler):
             payload = json.loads(body)
             text = str(payload.get("text", "")).strip()
             source = str(payload.get("source", "workbench_frontend"))
+            intent = str(payload.get("intent", "") or "").strip() or None
             if not text:
                 self._send_json({"ok": False, "error": "text is required"}, status=HTTPStatus.BAD_REQUEST)
                 return
@@ -85,10 +86,12 @@ class WorkbenchRequestHandler(SimpleHTTPRequestHandler):
                 source=source,
                 reply_target={"source": source},
                 create_remote_artifacts=True,
+                intent=intent,
             )
             self._send_json(
                 {
                     "ok": True,
+                    "intent": intent,
                     "command_id": result.parsed.command_id,
                     "summary": result.reply.get("summary", ""),
                     "reply_text": self.pipeline.command_service.format_reply_text(result.reply),
@@ -118,6 +121,25 @@ class WorkbenchRequestHandler(SimpleHTTPRequestHandler):
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
+
+    def _build_state_payload(self) -> dict:
+        state = self.state.snapshot()
+        notion_config = json.loads((self.base_dir / "config" / "notion_workspace.json").read_text(encoding="utf-8"))
+        feishu_config = json.loads((self.base_dir / "config" / "feishu_app.json").read_text(encoding="utf-8"))
+        state["notion_config"] = {
+            "workspace_name": notion_config.get("workspace_name", ""),
+            "workspace_url": notion_config.get("workspace_url", ""),
+            "private_library_url": notion_config.get("private_library_url", ""),
+            "prd_template_url": notion_config.get("prd_template_url", ""),
+            "todo_strategy": notion_config.get("todo_strategy", {}),
+            "feedback_strategy": notion_config.get("feedback_strategy", {}),
+            "routing_map": notion_config.get("routing_map", {}),
+        }
+        state["feishu_config"] = {
+            "document_channel": feishu_config.get("document_channel", ""),
+            "document_strategy": feishu_config.get("document_strategy", {}),
+        }
+        return state
 
 
 def run_workbench_server(base_dir: Path, host: str = "127.0.0.1", port: int = 4390) -> None:

@@ -1,5 +1,6 @@
 let apiAvailable = false;
 let currentCommandTemplate = "";
+let currentIntent = "";
 
 async function loadStaticData() {
   const response = await fetch("./data/workbench.json", { cache: "no-store" });
@@ -87,6 +88,67 @@ function renderRelease(obj) {
     .join("");
 }
 
+function renderConfig(data) {
+  const notion = data.notion_config || {};
+  const feishu = data.feishu_config || {};
+  const route = notion.routing_map || {};
+  const cards = [];
+
+  if (notion.workspace_url) {
+    cards.push(`
+      <div class="release-card">
+        <strong>Notion 工作空间</strong>
+        <span><a class="link" href="${escapeHtml(notion.workspace_url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(notion.workspace_name || "打开工作空间")}</a></span>
+      </div>
+    `);
+  }
+
+  if (notion.prd_template_url) {
+    cards.push(`
+      <div class="release-card">
+        <strong>PRD 模板</strong>
+        <span><a class="link" href="${escapeHtml(notion.prd_template_url)}" target="_blank" rel="noopener noreferrer">打开 Notion 模板</a></span>
+      </div>
+    `);
+  }
+
+  cards.push(`
+    <div class="release-card">
+      <strong>飞书文档策略</strong>
+      <span>${escapeHtml(feishu.document_channel || "飞书云文档")} · ${escapeHtml(feishu.document_strategy?.default_folder_label || "默认目录")}</span>
+    </div>
+  `);
+
+  if (notion.todo_strategy?.entry_name) {
+    cards.push(`
+      <div class="release-card">
+        <strong>待办收口</strong>
+        <span>${escapeHtml(notion.todo_strategy.database || "")} / ${escapeHtml(notion.todo_strategy.entry_name || "")}</span>
+      </div>
+    `);
+  }
+
+  if (notion.feedback_strategy?.entry_name) {
+    cards.push(`
+      <div class="release-card">
+        <strong>反馈收口</strong>
+        <span>${escapeHtml(notion.feedback_strategy.database || "")} / ${escapeHtml(notion.feedback_strategy.entry_name || "")}</span>
+      </div>
+    `);
+  }
+
+  if (route.wechat_growth?.database || route.ads_experiment?.database || route.platform_integration?.database) {
+    cards.push(`
+      <div class="release-card">
+        <strong>业务路由</strong>
+        <span>微信 -> ${escapeHtml(route.wechat_growth?.database || "-")}；广告 -> ${escapeHtml(route.ads_experiment?.database || "-")}；多平台 -> ${escapeHtml(route.platform_integration?.database || "-")}</span>
+      </div>
+    `);
+  }
+
+  return cards.join("");
+}
+
 function renderAlerts(items) {
   if (!items.length) {
     return `<p class="empty">暂无数据告警</p>`;
@@ -112,14 +174,16 @@ function showToast(message) {
   showToast.timer = window.setTimeout(() => toast.classList.add("hidden"), 2200);
 }
 
-function openModal(title, command) {
+function openModal(title, command, intent = "") {
   currentCommandTemplate = command;
+  currentIntent = intent;
   document.getElementById("modalTitle").textContent = title;
   document.getElementById("commandText").value = command;
   document.getElementById("commandModal").classList.remove("hidden");
 }
 
 function closeModal() {
+  currentIntent = "";
   document.getElementById("commandModal").classList.add("hidden");
 }
 
@@ -213,6 +277,7 @@ async function submitCommand() {
     body: JSON.stringify({
       text,
       source: "workbench_frontend",
+      intent: currentIntent || undefined,
     }),
   });
 
@@ -241,7 +306,8 @@ function wireActions() {
         "读取这个 Notion / 飞书文档链接，先整理成需求卡片草稿，不要归档。",
         "请输出：背景、目标、用户路径、规则、风险、待确认项。",
         "完成后把飞书文档链接回给我。"
-      ].join("\n")
+      ].join("\n"),
+      "new_card"
     );
   });
 
@@ -252,7 +318,8 @@ function wireActions() {
         "按照这个需求卡片生成 PRD 草稿，不要归档。",
         "PRD 结构按我的 Notion 模板来写。",
         "生成到飞书文档，完成后把链接回给我。"
-      ].join("\n")
+      ].join("\n"),
+      "new_prd"
     );
   });
 
@@ -262,7 +329,8 @@ function wireActions() {
       [
         "登记一条新的待办。",
         "请写清：事项、截止时间、当前阻塞点、需要我回传的结果。",
-      ].join("\n")
+      ].join("\n"),
+      "todo"
     );
   });
 
@@ -272,7 +340,8 @@ function wireActions() {
       [
         "记录一条工作台反馈。",
         "请说明：问题现象、复现方式、期望结果、优先级。",
-      ].join("\n")
+      ].join("\n"),
+      "feedback"
     );
   });
 
@@ -314,6 +383,7 @@ function bind(data) {
   document.getElementById("commandList").innerHTML = renderCommands(data.commands);
   document.getElementById("capabilityList").innerHTML = renderChips(data.capabilities);
   document.getElementById("releaseList").innerHTML = renderRelease(data.release_plan);
+  document.getElementById("configList").innerHTML = renderConfig(data);
   document.getElementById("feedbackList").innerHTML = renderTable(data.feedback, ["title", "category", "status"], "暂无反馈");
 }
 

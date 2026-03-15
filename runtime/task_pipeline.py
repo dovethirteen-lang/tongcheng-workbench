@@ -48,6 +48,7 @@ class TaskPipeline:
         source: str,
         reply_target: dict[str, str] | None = None,
         create_remote_artifacts: bool = True,
+        intent: str | None = None,
     ) -> TaskPipelineResult:
         parsed, command_path, reply_path = self.command_service.accept_text(
             text=text,
@@ -107,17 +108,17 @@ class TaskPipeline:
                     reply.setdefault("errors", []).append(str(exc))
                     self._write_runtime_log({"level": "error", "stage": "revision", "message": str(exc)})
 
-        todo_item = self._maybe_capture_todo(parsed)
+        todo_item = self._maybe_capture_todo(parsed, intent=intent)
         if todo_item:
             reply["todo_item"] = todo_item
             reply["todo_queue"] = {"path": str(enqueue_workspace_capture(self.base_dir, "todo", todo_item))}
 
-        feedback_item = self._maybe_capture_feedback(parsed)
+        feedback_item = self._maybe_capture_feedback(parsed, intent=intent)
         if feedback_item:
             reply["feedback_item"] = feedback_item
             reply["feedback_queue"] = {"path": str(enqueue_workspace_capture(self.base_dir, "feedback", feedback_item))}
 
-        alert_item = self._maybe_capture_alert(parsed)
+        alert_item = self._maybe_capture_alert(parsed, intent=intent)
         if alert_item:
             reply["alert_item"] = alert_item
             reply["alert_queue"] = {"path": str(enqueue_workspace_capture(self.base_dir, "alert", alert_item))}
@@ -154,9 +155,9 @@ class TaskPipeline:
         )
         return TaskPipelineResult(parsed=parsed, command_path=command_path, reply_path=reply_path, reply=reply)
 
-    def _maybe_capture_todo(self, parsed: ParsedCommand) -> dict[str, Any] | None:
+    def _maybe_capture_todo(self, parsed: ParsedCommand, intent: str | None = None) -> dict[str, Any] | None:
         text = parsed.normalized_text.lower()
-        if not any(keyword in text for keyword in TODO_KEYWORDS):
+        if intent != "todo" and not any(keyword in text for keyword in TODO_KEYWORDS):
             return None
         return self.state.record_todo(
             title=parsed.normalized_text[:80],
@@ -164,9 +165,11 @@ class TaskPipeline:
             deadline_hint=parsed.deadline_hint,
         )
 
-    def _maybe_capture_feedback(self, parsed: ParsedCommand) -> dict[str, Any] | None:
+    def _maybe_capture_feedback(self, parsed: ParsedCommand, intent: str | None = None) -> dict[str, Any] | None:
         text = parsed.normalized_text.lower()
         matched = next((keyword for keyword in FEEDBACK_KEYWORDS if keyword in text), None)
+        if intent == "feedback":
+            matched = matched or "feedback"
         if not matched:
             return None
         category = "bug" if "bug" in text else "experience_issue"
@@ -179,9 +182,9 @@ class TaskPipeline:
             category=category,
         )
 
-    def _maybe_capture_alert(self, parsed: ParsedCommand) -> dict[str, Any] | None:
+    def _maybe_capture_alert(self, parsed: ParsedCommand, intent: str | None = None) -> dict[str, Any] | None:
         text = parsed.normalized_text.lower()
-        if not any(keyword in text for keyword in ALERT_KEYWORDS):
+        if intent != "alert" and not any(keyword in text for keyword in ALERT_KEYWORDS):
             return None
         severity = "high" if any(token in text for token in ["暴跌", "异常", "预警"]) else "medium"
         return self.state.record_alert(

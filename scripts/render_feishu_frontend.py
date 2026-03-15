@@ -18,6 +18,8 @@ def main() -> None:
     data_dir.mkdir(parents=True, exist_ok=True)
 
     state = WorkbenchState().snapshot()
+    notion_config = json.loads((BASE_DIR / "config" / "notion_workspace.json").read_text(encoding="utf-8"))
+    feishu_config = json.loads((BASE_DIR / "config" / "feishu_app.json").read_text(encoding="utf-8"))
     payload = {
         "updated_at": state.get("updated_at", ""),
         "commands": state.get("commands", [])[:8],
@@ -27,6 +29,19 @@ def main() -> None:
         "alerts": state.get("alerts", [])[:8],
         "capabilities": state.get("capabilities", {}),
         "release_plan": state.get("release_plan", {}),
+        "notion_config": {
+            "workspace_name": notion_config.get("workspace_name", ""),
+            "workspace_url": notion_config.get("workspace_url", ""),
+            "private_library_url": notion_config.get("private_library_url", ""),
+            "prd_template_url": notion_config.get("prd_template_url", ""),
+            "todo_strategy": notion_config.get("todo_strategy", {}),
+            "feedback_strategy": notion_config.get("feedback_strategy", {}),
+            "routing_map": notion_config.get("routing_map", {}),
+        },
+        "feishu_config": {
+            "document_channel": feishu_config.get("document_channel", ""),
+            "document_strategy": feishu_config.get("document_strategy", {}),
+        },
     }
 
     output = data_dir / "workbench.json"
