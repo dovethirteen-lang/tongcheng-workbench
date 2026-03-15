@@ -6,6 +6,7 @@ on:
     branches:
       - codex/v1.0
     paths:
+      - ".github/workflows/deploy-feishu-workbench.yml"
       - "09_feishu_frontend/**"
       - "scripts/render_feishu_frontend.py"
       - "scripts/build_feishu_frontend_release.py"
