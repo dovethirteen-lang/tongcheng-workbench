@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>同程产品工作台 | 飞书前台</title>
-  <link rel="stylesheet" href="./styles.css?v=20260316001844">
+  <link rel="stylesheet" href="./styles.css?v=20260316003336">
 </head>
 <body>
   <div class="app-shell">
@@ -144,6 +144,16 @@
           <div id="resultBox" class="result-box empty">还没有执行记录。</div>
         </section>
 
+        <section class="panel" id="localHistorySection">
+          <div class="panel-head">
+            <div>
+              <p class="panel-kicker">Local Trail</p>
+              <h2>本地历史</h2>
+            </div>
+          </div>
+          <div id="localHistoryList" class="stack compact"></div>
+        </section>
+
         <section class="panel">
           <div class="panel-head">
             <div>
@@ -203,6 +213,7 @@
       <textarea id="commandText"></textarea>
       <div class="modal-actions">
         <button type="button" id="btnSubmitCommand">直接提交到主控</button>
+        <button type="button" class="ghost" id="btnSaveLocal">保存到本地历史</button>
         <button type="button" class="ghost" id="btnCopyCommand">复制命令</button>
         <button type="button" class="ghost" id="btnDismissModal">我知道了</button>
       </div>
@@ -211,6 +222,6 @@
 
   <div class="toast hidden" id="toast"></div>
 
-  <script src="./app.js?v=20260316001844"></script>
+  <script src="./app.js?v=20260316003336"></script>
 </body>
 </html>

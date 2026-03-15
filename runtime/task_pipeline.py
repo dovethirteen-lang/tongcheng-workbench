@@ -147,6 +147,28 @@ class TaskPipeline:
             reply["status_page"] = {"path": str(status_page)}
 
         self.command_service.save_reply(reply_path, reply)
+        self.state.record_result(
+            {
+                "command_id": parsed.command_id,
+                "task_type": parsed.task_type,
+                "lane": parsed.lane,
+                "action": parsed.action,
+                "summary": reply.get("summary", ""),
+                "doc_draft": reply.get("doc_draft"),
+                "revision_request": reply.get("revision_request"),
+                "notion_archive": reply.get("notion_archive"),
+                "wiki_handoff": reply.get("wiki_handoff"),
+                "todo_item": reply.get("todo_item"),
+                "feedback_item": reply.get("feedback_item"),
+                "alert_item": reply.get("alert_item"),
+                "todo_queue": reply.get("todo_queue"),
+                "feedback_queue": reply.get("feedback_queue"),
+                "alert_queue": reply.get("alert_queue"),
+                "warnings": reply.get("warnings", []),
+                "errors": reply.get("errors", []),
+                "created_at": datetime.now().isoformat(timespec="seconds"),
+            }
+        )
         self._write_runtime_log(
             {
                 "level": "info",

@@ -1,5 +1,8 @@
+const DRAFT_STORAGE_KEY = "tc_workbench_composer_draft";
+const HISTORY_STORAGE_KEY = "tc_workbench_local_history";
+const HISTORY_LIMIT = 20;
+
 let apiAvailable = false;
-let currentCommandTemplate = "";
 let currentIntent = "";
 let currentLane = "general";
 let currentAction = "general";
@@ -36,8 +39,8 @@ function renderApiStatus() {
   node.textContent = apiAvailable ? "后端状态：已连接" : "后端状态：静态预览";
   document.getElementById("btnSubmitCommand").disabled = !apiAvailable;
   document.getElementById("modalHint").textContent = apiAvailable
-    ? "当前已连接本地主控。你可以直接提交到后端，也可以复制后发给飞书助手。"
-    : "当前是静态预览模式。你可以先复制下面这条命令，发给飞书里的工作助手。";
+    ? "当前已连接本地主控。你可以直接提交到后端，也可以保存到本地历史后再发给飞书助手。"
+    : "当前是静态预览模式。你可以生成命令、保存到本地历史，或复制后发给飞书里的工作助手。";
 }
 
 function metric(label, value, suffix = "") {
@@ -90,24 +93,88 @@ function renderRelease(obj) {
     .join("");
 }
 
-function buildComposerCommand() {
-  const lane = document.getElementById("composerLane").value;
-  const action = document.getElementById("composerAction").value;
-  const link = document.getElementById("composerLink").value.trim();
-  const deadline = document.getElementById("composerDeadline").value.trim();
-  const notes = document.getElementById("composerNotes").value.trim();
+function getComposerState() {
+  return {
+    lane: document.getElementById("composerLane").value,
+    action: document.getElementById("composerAction").value,
+    link: document.getElementById("composerLink").value.trim(),
+    deadline: document.getElementById("composerDeadline").value.trim(),
+    notes: document.getElementById("composerNotes").value.trim(),
+  };
+}
 
-  const laneLabelMap = {
+function saveComposerDraft() {
+  const draft = getComposerState();
+  localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
+}
+
+function restoreComposerDraft() {
+  try {
+    const raw = localStorage.getItem(DRAFT_STORAGE_KEY);
+    if (!raw) {
+      return;
+    }
+    const draft = JSON.parse(raw);
+    document.getElementById("composerLane").value = draft.lane || "wechat_growth";
+    document.getElementById("composerAction").value = draft.action || "requirement_card";
+    document.getElementById("composerLink").value = draft.link || "";
+    document.getElementById("composerDeadline").value = draft.deadline || "";
+    document.getElementById("composerNotes").value = draft.notes || "";
+  } catch (_error) {
+    localStorage.removeItem(DRAFT_STORAGE_KEY);
+  }
+}
+
+function readLocalHistory() {
+  try {
+    const raw = localStorage.getItem(HISTORY_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch (_error) {
+    localStorage.removeItem(HISTORY_STORAGE_KEY);
+    return [];
+  }
+}
+
+function writeLocalHistory(items) {
+  localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(items.slice(0, HISTORY_LIMIT)));
+}
+
+function rememberLocalAction(item) {
+  const history = readLocalHistory().filter((entry) => entry.id !== item.id);
+  history.unshift(item);
+  writeLocalHistory(history);
+  renderLocalHistory(history);
+}
+
+function laneLabel(lane) {
+  const map = {
     wechat_growth: "微信流量提效",
     ads_experiment: "广告专项",
     platform_integration: "多平台项目",
     daily_ops: "每日作战",
     general: "通用事项",
   };
+  return map[lane] || "通用事项";
+}
 
-  const prefix = `这是一个${laneLabelMap[lane] || "通用事项"}任务。`;
-  const sourceLine = link ? `资料位置：${link}` : "资料位置：待补充";
-  const deadlineLine = deadline ? `截止时间：${deadline}` : "";
+function actionLabel(action) {
+  const map = {
+    requirement_card: "需求卡片",
+    prd_draft: "PRD 草稿",
+    analysis: "分析/方案",
+    todo: "待办",
+    feedback: "反馈",
+    alert: "数据告警",
+    finalize: "确定定稿",
+  };
+  return map[action] || "通用动作";
+}
+
+function buildComposerCommand() {
+  const draft = getComposerState();
+  const prefix = `这是一个${laneLabel(draft.lane)}任务。`;
+  const sourceLine = draft.link ? `资料位置：${draft.link}` : "资料位置：待补充";
+  const deadlineLine = draft.deadline ? `截止时间：${draft.deadline}` : "";
 
   const actionTemplates = {
     requirement_card: [
@@ -143,12 +210,12 @@ function buildComposerCommand() {
     ],
   };
 
-  const parts = [prefix, sourceLine, ...actionTemplates[action]];
+  const parts = [prefix, sourceLine, ...(actionTemplates[draft.action] || actionTemplates.requirement_card)];
   if (deadlineLine) {
     parts.push(deadlineLine);
   }
-  if (notes) {
-    parts.push(`补充说明：${notes}`);
+  if (draft.notes) {
+    parts.push(`补充说明：${draft.notes}`);
   }
   return parts.filter(Boolean).join("\n");
 }
@@ -240,7 +307,6 @@ function showToast(message) {
 }
 
 function openModal(title, command, intent = "", lane = "general", action = "general") {
-  currentCommandTemplate = command;
   currentIntent = intent;
   currentLane = lane;
   currentAction = action;
@@ -256,14 +322,51 @@ function closeModal() {
   document.getElementById("commandModal").classList.add("hidden");
 }
 
+function createLocalHistoryEntry(text, status, result = {}) {
+  return {
+    id: `local-${Date.now()}`,
+    title: `${laneLabel(currentLane)} · ${actionLabel(currentAction)}`,
+    lane: currentLane,
+    action: currentAction,
+    intent: currentIntent || currentAction,
+    text,
+    status,
+    summary: result.summary || (status === "saved" ? "已保存到本地历史，待发送给飞书助手。" : "已记录到本地。"),
+    doc_draft: result.doc_draft || null,
+    wiki_handoff: result.wiki_handoff || null,
+    todo_queue: result.todo_queue || null,
+    feedback_queue: result.feedback_queue || null,
+    alert_queue: result.alert_queue || null,
+    warnings: result.warnings || [],
+    errors: result.errors || [],
+    created_at: new Date().toISOString(),
+  };
+}
+
 async function copyCommand() {
   const text = document.getElementById("commandText").value;
   try {
     await navigator.clipboard.writeText(text);
-    showToast("命令已复制。");
+    const entry = createLocalHistoryEntry(text, "copied");
+    rememberLocalAction(entry);
+    renderResult(entry);
+    showToast("命令已复制，并记录到本地历史。");
   } catch (_error) {
     showToast("复制失败，请手动复制。");
   }
+}
+
+function saveLocalEntry() {
+  const text = document.getElementById("commandText").value.trim();
+  if (!text) {
+    showToast("命令内容不能为空。");
+    return;
+  }
+  const entry = createLocalHistoryEntry(text, "saved");
+  rememberLocalAction(entry);
+  renderResult(entry);
+  closeModal();
+  showToast("已保存到本地历史。");
 }
 
 function scrollToSection(id) {
@@ -291,17 +394,8 @@ function renderResult(result) {
   if (result.doc_draft?.url) {
     parts.push(`<p><a class="link" href="${escapeHtml(result.doc_draft.url)}" target="_blank" rel="noopener noreferrer">打开飞书草稿</a></p>`);
   }
-  if (result.warnings?.length) {
-    parts.push(...result.warnings.map((item) => `<p class="warn-text">警告：${escapeHtml(item)}</p>`));
-  }
-  if (result.errors?.length) {
-    parts.push(...result.errors.map((item) => `<p class="error-text">错误：${escapeHtml(item)}</p>`));
-  }
   if (result.wiki_handoff?.path) {
     parts.push(`<p>已生成 Wiki 中间稿：${escapeHtml(result.wiki_handoff.path)}</p>`);
-  }
-  if (result.alert_item?.title) {
-    parts.push(`<p>已登记数据告警：${escapeHtml(result.alert_item.title)}</p>`);
   }
   if (result.todo_queue?.path) {
     parts.push(`<p>待办收口文件：${escapeHtml(result.todo_queue.path)}</p>`);
@@ -312,8 +406,72 @@ function renderResult(result) {
   if (result.alert_queue?.path) {
     parts.push(`<p>告警收口文件：${escapeHtml(result.alert_queue.path)}</p>`);
   }
+  if (result.warnings?.length) {
+    parts.push(...result.warnings.map((item) => `<p class="warn-text">警告：${escapeHtml(item)}</p>`));
+  }
+  if (result.errors?.length) {
+    parts.push(...result.errors.map((item) => `<p class="error-text">错误：${escapeHtml(item)}</p>`));
+  }
+  if (result.created_at) {
+    parts.push(`<p class="result-meta">更新时间：${escapeHtml(result.created_at)}</p>`);
+  }
   node.className = "result-box";
   node.innerHTML = parts.join("") || "<p>已提交主控处理。</p>";
+}
+
+function renderLocalHistory(items) {
+  const node = document.getElementById("localHistoryList");
+  if (!node) {
+    return;
+  }
+  if (!items.length) {
+    node.innerHTML = '<p class="empty">还没有本地留痕。你复制、保存或直连提交后，会显示在这里。</p>';
+    return;
+  }
+  node.innerHTML = items.map((item) => `
+    <div class="history-card">
+      <div class="history-head">
+        <strong>${escapeHtml(item.title || "未命名动作")}</strong>
+        <span class="badge">${escapeHtml(item.status || "saved")}</span>
+      </div>
+      <p>${escapeHtml(item.summary || "")}</p>
+      <div class="history-meta">${escapeHtml(item.created_at || "")}</div>
+      <div class="history-actions">
+        <button type="button" class="ghost small" data-history-open="${escapeHtml(item.id)}">继续编辑</button>
+        <button type="button" class="ghost small" data-history-copy="${escapeHtml(item.id)}">复制命令</button>
+      </div>
+    </div>
+  `).join("");
+}
+
+async function copyText(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    showToast("命令已复制。");
+  } catch (_error) {
+    showToast("复制失败，请手动复制。");
+  }
+}
+
+function wireHistoryActions() {
+  const node = document.getElementById("localHistoryList");
+  node.addEventListener("click", async (event) => {
+    const openId = event.target.getAttribute("data-history-open");
+    const copyId = event.target.getAttribute("data-history-copy");
+    if (!openId && !copyId) {
+      return;
+    }
+    const history = readLocalHistory();
+    const item = history.find((entry) => entry.id === (openId || copyId));
+    if (!item) {
+      return;
+    }
+    if (openId) {
+      openModal(item.title || "继续编辑", item.text || "", item.intent || "", item.lane || "general", item.action || "general");
+      return;
+    }
+    await copyText(item.text || "");
+  });
 }
 
 async function reloadWorkbench() {
@@ -363,13 +521,36 @@ async function submitCommand() {
     return;
   }
 
+  const entry = createLocalHistoryEntry(text, "submitted", payload);
+  rememberLocalAction(entry);
   closeModal();
   bind(payload.state);
   renderResult(payload);
   showToast("命令已提交到主控。");
 }
 
-function wireActions() {
+function applyTemplatesToComposer() {
+  document.getElementById("btnGenerateCommand").addEventListener("click", () => {
+    saveComposerDraft();
+    document.getElementById("composerOutput").value = buildComposerCommand();
+    showToast("标准命令已生成。");
+  });
+
+  document.getElementById("btnUseGenerated").addEventListener("click", () => {
+    saveComposerDraft();
+    const text = document.getElementById("composerOutput").value.trim() || buildComposerCommand();
+    document.getElementById("composerOutput").value = text;
+    openModal(
+      `标准命令 · ${laneLabel(document.getElementById("composerLane").value)}`,
+      text,
+      document.getElementById("composerAction").value,
+      document.getElementById("composerLane").value,
+      document.getElementById("composerAction").value
+    );
+  });
+}
+
+function bindQuickButtons() {
   document.getElementById("btnNewCard").addEventListener("click", () => {
     openModal(
       "新建需求卡片",
@@ -430,22 +611,21 @@ function wireActions() {
   });
 
   document.getElementById("btnReload").addEventListener("click", reloadWorkbench);
-  document.getElementById("btnGenerateCommand").addEventListener("click", () => {
-    document.getElementById("composerOutput").value = buildComposerCommand();
-    showToast("标准命令已生成。");
-  });
-  document.getElementById("btnUseGenerated").addEventListener("click", () => {
-    const text = document.getElementById("composerOutput").value.trim() || buildComposerCommand();
-    document.getElementById("composerOutput").value = text;
-    openModal(
-      "标准命令",
-      text,
-      document.getElementById("composerAction").value,
-      document.getElementById("composerLane").value,
-      document.getElementById("composerAction").value
-    );
-  });
+}
+
+function wireActions() {
+  bindQuickButtons();
+  applyTemplatesToComposer();
+  wireHistoryActions();
+
+  document.querySelectorAll("#composerLane, #composerAction, #composerLink, #composerDeadline, #composerNotes")
+    .forEach((node) => {
+      node.addEventListener("input", saveComposerDraft);
+      node.addEventListener("change", saveComposerDraft);
+    });
+
   document.getElementById("btnCopyCommand").addEventListener("click", copyCommand);
+  document.getElementById("btnSaveLocal").addEventListener("click", saveLocalEntry);
   document.getElementById("btnSubmitCommand").addEventListener("click", submitCommand);
   document.getElementById("btnCloseModal").addEventListener("click", closeModal);
   document.getElementById("btnDismissModal").addEventListener("click", closeModal);
@@ -457,6 +637,9 @@ function wireActions() {
 }
 
 function bind(data) {
+  const localHistory = readLocalHistory();
+  const lastResult = data.last_result && Object.keys(data.last_result).length ? data.last_result : localHistory[0] || null;
+
   document.getElementById("updatedAt").textContent = `更新时间 ${data.updated_at || "-"}`;
   document.getElementById("metrics").innerHTML = [
     metric("最近命令", data.commands.length),
@@ -479,16 +662,18 @@ function bind(data) {
   document.getElementById("releaseList").innerHTML = renderRelease(data.release_plan);
   document.getElementById("configList").innerHTML = renderConfig(data);
   document.getElementById("feedbackList").innerHTML = renderTable(data.feedback, ["title", "category", "status"], "暂无反馈");
+  renderResult(lastResult);
+  renderLocalHistory(localHistory);
 }
 
 wireActions();
+restoreComposerDraft();
 
 (async () => {
   try {
     await detectApi();
     const data = await getState();
     bind(data);
-    renderResult(null);
   } catch (error) {
     console.error(error);
     document.body.innerHTML = '<div class="app-shell"><p class="empty">前台数据加载失败，请先执行 render_feishu_frontend.py。</p></div>';

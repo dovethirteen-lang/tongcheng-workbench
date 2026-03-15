@@ -113,7 +113,7 @@ class WorkbenchRequestHandler(SimpleHTTPRequestHandler):
                     "alert_item": result.reply.get("alert_item"),
                     "alert_queue": result.reply.get("alert_queue"),
                     "todo_queue": result.reply.get("todo_queue"),
-                    "state": self.state.snapshot(),
+                    "state": self._build_state_payload(),
                 }
             )
             return
