@@ -162,9 +162,19 @@ class CommandRouter:
 
     def _extract_inputs(self, text: str) -> list[str]:
         inputs: list[str] = []
+        labeled_patterns = [
+            r"资料位置[:：]\s*([^\r\n`]+)",
+            r"聊天截图[:：]\s*([^\r\n`]+)",
+        ]
+        for pattern in labeled_patterns:
+            for match in re.findall(pattern, text, flags=re.IGNORECASE):
+                value = match.strip()
+                if value and value not in inputs:
+                    inputs.append(value)
+
         patterns = [
             r"https?://[^\s]+",
-            r"[A-Za-z]:\\[^\n]+",
+            r"[A-Za-z]:\\[^\r\n`]+",
             r"[A-Za-z]:\\[^\n]+\.(?:png|jpg|jpeg|webp|gif)",
             r"https?://[^\s]+\.(?:png|jpg|jpeg|webp|gif)",
             r"\bnotion\b",

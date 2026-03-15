@@ -367,6 +367,7 @@ function createLocalHistoryEntry(text, status, result = {}) {
     text,
     status,
     summary: result.summary || (status === "saved" ? "已保存到本地历史，待发送给飞书助手。" : "已记录到本地。"),
+    materials: result.materials || [],
     doc_draft: result.doc_draft || null,
     wiki_handoff: result.wiki_handoff || null,
     todo_queue: result.todo_queue || null,
@@ -425,6 +426,10 @@ function renderResult(result) {
   const parts = [];
   if (result.summary) {
     parts.push(`<p>${escapeHtml(result.summary)}</p>`);
+  }
+  if (result.materials?.length) {
+    parts.push("<p><strong>输入材料：</strong></p>");
+    parts.push(...result.materials.map((item) => `<p>${escapeHtml(item)}</p>`));
   }
   if (result.doc_draft?.url) {
     parts.push(`<p><a class="link" href="${escapeHtml(result.doc_draft.url)}" target="_blank" rel="noopener noreferrer">打开飞书草稿</a></p>`);

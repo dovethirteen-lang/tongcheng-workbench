@@ -154,6 +154,7 @@ class TaskPipeline:
                 "lane": parsed.lane,
                 "action": parsed.action,
                 "summary": reply.get("summary", ""),
+                "materials": reply.get("materials", []),
                 "doc_draft": reply.get("doc_draft"),
                 "revision_request": reply.get("revision_request"),
                 "notion_archive": reply.get("notion_archive"),

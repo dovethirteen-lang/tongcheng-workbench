@@ -101,6 +101,7 @@ class WorkbenchRequestHandler(SimpleHTTPRequestHandler):
                     "action": action,
                     "command_id": result.parsed.command_id,
                     "summary": result.reply.get("summary", ""),
+                    "materials": result.reply.get("materials", []),
                     "reply_text": self.pipeline.command_service.format_reply_text(result.reply),
                     "doc_draft": result.reply.get("doc_draft"),
                     "revision_request": result.reply.get("revision_request"),

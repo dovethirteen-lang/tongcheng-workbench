@@ -1,6 +1,13 @@
 {
-  "updated_at": "2026-03-16T01:22:06",
+  "updated_at": "2026-03-16T01:25:58",
   "commands": [
+    {
+      "command_id": "cmd-072051c3",
+      "task_type": "daily_ops",
+      "source": "workbench_frontend",
+      "normalized_text": "这是一个每日作战任务。资料位置：D:\\Project\\docs\\meeting-notes.md`n聊天截图：D:\\Project\\docs\\wecom-chat-0316.png`n请结合聊天截图一起理解上下文，不要只看文字摘要。`n请登记一条新的待办。`n写清事项、阻塞点、回传结果。",
+      "created_at": "2026-03-16T01:25:58"
+    },
     {
       "command_id": "cmd-e971373d",
       "task_type": "daily_ops",
@@ -49,17 +56,18 @@
       "source": "workbench_frontend",
       "normalized_text": "????????????:???????????????????????",
       "created_at": "2026-03-15T23:40:17"
-    },
-    {
-      "command_id": "cmd-9784f152",
-      "task_type": "general",
-      "source": "workbench_frontend",
-      "normalized_text": "????????????:???????????????????????",
-      "created_at": "2026-03-15T23:40:17"
     }
   ],
   "documents": [],
   "todos": [
+    {
+      "id": "todo-20260316012558",
+      "title": "这是一个每日作战任务。资料位置：D:\\Project\\docs\\meeting-notes.md`n聊天截图：D:\\Project\\docs\\wecom-cha",
+      "source": "workbench_frontend",
+      "deadline_hint": "",
+      "status": "open",
+      "created_at": "2026-03-16T01:25:58"
+    },
     {
       "id": "todo-20260316011804",
       "title": "这是一个每日作战任务。资料位置：D:\\Project\\docs\\meeting-notes.md`n聊天截图：D:\\Project\\docs\\wecom-cha",
@@ -108,7 +116,7 @@
     }
   ],
   "last_result": {
-    "command_id": "cmd-e971373d",
+    "command_id": "cmd-072051c3",
     "task_type": "daily_ops",
     "lane": "daily_ops",
     "action": "todo",
@@ -118,23 +126,23 @@
     "notion_archive": null,
     "wiki_handoff": null,
     "todo_item": {
-      "id": "todo-20260316011804",
+      "id": "todo-20260316012558",
       "title": "这是一个每日作战任务。资料位置：D:\\Project\\docs\\meeting-notes.md`n聊天截图：D:\\Project\\docs\\wecom-cha",
       "source": "workbench_frontend",
       "deadline_hint": "",
       "status": "open",
-      "created_at": "2026-03-16T01:18:04"
+      "created_at": "2026-03-16T01:25:58"
     },
     "feedback_item": null,
     "alert_item": null,
     "todo_queue": {
-      "path": "D:\\Project\\runtime\\notion_workspace_queue\\todo\\todo-20260316011804.json"
+      "path": "D:\\Project\\runtime\\notion_workspace_queue\\todo\\todo-20260316012558.json"
     },
     "feedback_queue": null,
     "alert_queue": null,
     "warnings": [],
     "errors": [],
-    "created_at": "2026-03-16T01:18:04"
+    "created_at": "2026-03-16T01:25:58"
   },
   "capabilities": {
     "feishu_entry": "ready",

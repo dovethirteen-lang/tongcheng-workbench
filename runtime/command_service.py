@@ -75,6 +75,11 @@ class CommandService:
         ]
         lines.extend(f"- {item}" for item in reply.get("next_actions", [])[:4])
 
+        materials = reply.get("materials") or []
+        if materials:
+            lines.extend(["", "输入材料："])
+            lines.extend(f"- {item}" for item in materials[:5])
+
         doc_draft = reply.get("doc_draft") or {}
         if doc_draft.get("url"):
             lines.extend(["", f"飞书草稿：{doc_draft['url']}"])
@@ -138,6 +143,7 @@ class CommandService:
             "summary": self._build_summary(parsed),
             "next_actions": parsed.next_actions,
             "assumptions": parsed.assumptions,
+            "materials": parsed.inputs,
             "created_at": datetime.now().isoformat(timespec="seconds"),
             "command": asdict(parsed),
             "reply_target": reply_target or {},
