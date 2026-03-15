@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-03-15T22:06:35",
+  "updated_at": "2026-03-15T22:20:57",
   "commands": [],
   "documents": [],
   "todos": [],
@@ -7,8 +7,8 @@
   "alerts": [
     {
       "id": "alert-20260315201858",
-      "title": "test alert",
-      "detail": "detail",
+      "title": "测试告警",
+      "detail": "这是一个前台联调用的测试告警。",
       "source": "manual",
       "severity": "high",
       "status": "open",
@@ -17,7 +17,7 @@
     {
       "id": "alert-20260315201806",
       "title": "机票实验转化率异常下降",
-      "detail": "需要今天排查投放链路",
+      "detail": "需要今天排查投放链路，并确认补贴策略是否生效。",
       "source": "manual-test",
       "severity": "high",
       "status": "open",

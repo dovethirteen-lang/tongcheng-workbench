@@ -1,13 +1,13 @@
 {
-  "updated_at": "2026-03-15T22:06:35",
+  "updated_at": "2026-03-15T22:20:57",
   "alert_count": 2,
   "todo_count": 0,
   "feedback_count": 0,
   "document_count": 0,
   "top_alert": {
     "id": "alert-20260315201858",
-    "title": "test alert",
-    "detail": "detail",
+    "title": "测试告警",
+    "detail": "这是一个前台联调用的测试告警。",
     "source": "manual",
     "severity": "high",
     "status": "open",

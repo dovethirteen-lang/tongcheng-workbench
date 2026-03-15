@@ -1,5 +1,3 @@
-let currentData = null;
-
 async function loadData() {
   const response = await fetch("./data/workbench.json", { cache: "no-store" });
   if (!response.ok) {
@@ -163,13 +161,12 @@ function wireActions() {
 }
 
 function bind(data) {
-  currentData = data;
   document.getElementById("updatedAt").textContent = `更新时间 ${data.updated_at || "-"}`;
   document.getElementById("metrics").innerHTML = [
     metric("最近命令", data.commands.length),
     metric("文档数量", data.documents.length),
-    metric("打开待办", data.todos.filter((x) => x.status === "open").length),
-    metric("数据告警", data.alerts.filter((x) => x.status === "open").length),
+    metric("打开待办", data.todos.filter((item) => item.status === "open").length),
+    metric("数据告警", data.alerts.filter((item) => item.status === "open").length),
     metric("反馈池", data.feedback.length),
   ].join("");
 
@@ -192,5 +189,5 @@ loadData()
   .then(bind)
   .catch((error) => {
     console.error(error);
-    document.body.innerHTML = `<div class="app-shell"><p class="empty">前台数据加载失败，请先执行 render_feishu_frontend.py。</p></div>`;
+    document.body.innerHTML = '<div class="app-shell"><p class="empty">前台数据加载失败，请先执行 render_feishu_frontend.py。</p></div>';
   });
