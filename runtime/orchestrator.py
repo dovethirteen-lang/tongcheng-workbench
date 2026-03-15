@@ -165,6 +165,8 @@ class CommandRouter:
         patterns = [
             r"https?://[^\s]+",
             r"[A-Za-z]:\\[^\n]+",
+            r"[A-Za-z]:\\[^\n]+\.(?:png|jpg|jpeg|webp|gif)",
+            r"https?://[^\s]+\.(?:png|jpg|jpeg|webp|gif)",
             r"\bnotion\b",
             r"\bfeishu\b",
             r"\bpdf\b",
@@ -203,6 +205,8 @@ class CommandRouter:
         assumptions: list[str] = []
         if not inputs:
             assumptions.append("当前命令未显式提供链接或目录，主控层需要用户补充资料位置。")
+        if any(value.lower().endswith((".png", ".jpg", ".jpeg", ".webp", ".gif")) for value in inputs):
+            assumptions.append("当前任务包含截图或图片材料，主控层需要结合图片上下文与补充说明共同判断。")
         if task_type == "knowledge_archive":
             assumptions.append("默认将成品归档到 Notion，并保留来源链接和版本信息。")
         if task_type == "wechat_growth":

@@ -58,6 +58,7 @@ class WorkbenchRequestHandler(SimpleHTTPRequestHandler):
                     ],
                     "new_todo": [
                         "登记一条新的待办。",
+                        "如果来源是企业微信聊天记录，请把聊天截图一起带上。",
                         "请写清：事项、截止时间、当前阻塞点、需要我回传的结果。",
                     ],
                     "new_feedback": [

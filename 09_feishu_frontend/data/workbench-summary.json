@@ -1,16 +1,16 @@
 {
-  "updated_at": "2026-03-16T00:33:36",
-  "alert_count": 2,
-  "todo_count": 0,
+  "updated_at": "2026-03-16T01:18:04",
+  "alert_count": 3,
+  "todo_count": 2,
   "feedback_count": 0,
   "document_count": 0,
   "top_alert": {
-    "id": "alert-20260315201858",
-    "title": "测试告警",
-    "detail": "这是一个前台联调用的测试告警。",
-    "source": "manual",
+    "id": "alert-20260316003904",
+    "title": "这是一个广告专项任务。资料位置：https://www.notion.so/test`n请记录一条数据告警。`n写清异常",
+    "detail": "这是一个广告专项任务。资料位置：https://www.notion.so/test`n请记录一条数据告警。`n写清异常指标、波动情况、初步判断、下一步排查动作。",
+    "source": "workbench_frontend",
     "severity": "high",
     "status": "open",
-    "created_at": "2026-03-15T20:18:58"
+    "created_at": "2026-03-16T00:39:04"
   }
 }

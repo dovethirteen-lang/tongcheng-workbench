@@ -98,6 +98,7 @@ function getComposerState() {
     lane: document.getElementById("composerLane").value,
     action: document.getElementById("composerAction").value,
     link: document.getElementById("composerLink").value.trim(),
+    screenshot: document.getElementById("composerScreenshot").value.trim(),
     deadline: document.getElementById("composerDeadline").value.trim(),
     notes: document.getElementById("composerNotes").value.trim(),
   };
@@ -118,6 +119,7 @@ function restoreComposerDraft() {
     document.getElementById("composerLane").value = draft.lane || "wechat_growth";
     document.getElementById("composerAction").value = draft.action || "requirement_card";
     document.getElementById("composerLink").value = draft.link || "";
+    document.getElementById("composerScreenshot").value = draft.screenshot || "";
     document.getElementById("composerDeadline").value = draft.deadline || "";
     document.getElementById("composerNotes").value = draft.notes || "";
   } catch (_error) {
@@ -174,6 +176,7 @@ function buildComposerCommand() {
   const draft = getComposerState();
   const prefix = `这是一个${laneLabel(draft.lane)}任务。`;
   const sourceLine = draft.link ? `资料位置：${draft.link}` : "资料位置：待补充";
+  const screenshotLine = draft.screenshot ? `聊天截图：${draft.screenshot}` : "";
   const deadlineLine = draft.deadline ? `截止时间：${draft.deadline}` : "";
 
   const actionTemplates = {
@@ -210,7 +213,12 @@ function buildComposerCommand() {
     ],
   };
 
-  const parts = [prefix, sourceLine, ...(actionTemplates[draft.action] || actionTemplates.requirement_card)];
+  const parts = [prefix, sourceLine];
+  if (screenshotLine) {
+    parts.push(screenshotLine);
+    parts.push("请结合聊天截图一起理解上下文，不要只看文字摘要。");
+  }
+  parts.push(...(actionTemplates[draft.action] || actionTemplates.requirement_card));
   if (deadlineLine) {
     parts.push(deadlineLine);
   }
@@ -584,6 +592,7 @@ function bindQuickButtons() {
       "登记待办",
       [
         "登记一条新的待办。",
+        "如果来源是企业微信聊天记录，请把聊天截图一起带上。",
         "请写清：事项、截止时间、当前阻塞点、需要我回传的结果。",
       ].join("\n"),
       "todo",
@@ -618,7 +627,7 @@ function wireActions() {
   applyTemplatesToComposer();
   wireHistoryActions();
 
-  document.querySelectorAll("#composerLane, #composerAction, #composerLink, #composerDeadline, #composerNotes")
+  document.querySelectorAll("#composerLane, #composerAction, #composerLink, #composerScreenshot, #composerDeadline, #composerNotes")
     .forEach((node) => {
       node.addEventListener("input", saveComposerDraft);
       node.addEventListener("change", saveComposerDraft);

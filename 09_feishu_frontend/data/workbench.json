@@ -1,6 +1,27 @@
 {
-  "updated_at": "2026-03-16T00:33:36",
+  "updated_at": "2026-03-16T01:18:04",
   "commands": [
+    {
+      "command_id": "cmd-e971373d",
+      "task_type": "daily_ops",
+      "source": "workbench_frontend",
+      "normalized_text": "这是一个每日作战任务。资料位置：D:\\Project\\docs\\meeting-notes.md`n聊天截图：D:\\Project\\docs\\wecom-chat-0316.png`n请结合聊天截图一起理解上下文，不要只看文字摘要。`n请登记一条新的待办。`n写清事项、阻塞点、回传结果。",
+      "created_at": "2026-03-16T01:18:04"
+    },
+    {
+      "command_id": "cmd-f09873e2",
+      "task_type": "daily_ops",
+      "source": "workbench_frontend",
+      "normalized_text": "这是一个每日作战任务。资料位置：D:\\Project\\data\\ads\\exp.csv`n请登记一条新的待办。`n写清事项、阻塞点、回传结果。",
+      "created_at": "2026-03-16T00:39:04"
+    },
+    {
+      "command_id": "cmd-356109d1",
+      "task_type": "ads_experiment",
+      "source": "workbench_frontend",
+      "normalized_text": "这是一个广告专项任务。资料位置：https://www.notion.so/test`n请记录一条数据告警。`n写清异常指标、波动情况、初步判断、下一步排查动作。",
+      "created_at": "2026-03-16T00:39:04"
+    },
     {
       "command_id": "cmd-f3ee3d33",
       "task_type": "general",
@@ -35,33 +56,38 @@
       "source": "workbench_frontend",
       "normalized_text": "????????????:???????????????????????",
       "created_at": "2026-03-15T23:40:17"
-    },
-    {
-      "command_id": "cmd-da03821e",
-      "task_type": "general",
-      "source": "workbench_frontend",
-      "normalized_text": "?????????????:???????????????????",
-      "created_at": "2026-03-15T23:40:17"
-    },
-    {
-      "command_id": "cmd-1e06f940",
-      "task_type": "wechat_growth",
-      "source": "workbench_frontend",
-      "normalized_text": "读取这个 Notion / 飞书文档链接，先整理成需求卡片草稿，不要归档。 请输出：背景、目标、用户路径、规则、风险、待确认项。 完成后把飞书文档链接回给我。",
-      "created_at": "2026-03-15T23:16:56"
-    },
-    {
-      "command_id": "cmd-dfe8aa05",
-      "task_type": "wechat_growth",
-      "source": "workbench_frontend",
-      "normalized_text": "读取这个 Notion / 飞书文档链接，先整理成需求卡片草稿，不要归档。 请输出：背景、目标、用户路径、规则、风险、待确认项。 完成后把飞书文档链接回给我。",
-      "created_at": "2026-03-15T23:11:55"
     }
   ],
   "documents": [],
-  "todos": [],
+  "todos": [
+    {
+      "id": "todo-20260316011804",
+      "title": "这是一个每日作战任务。资料位置：D:\\Project\\docs\\meeting-notes.md`n聊天截图：D:\\Project\\docs\\wecom-cha",
+      "source": "workbench_frontend",
+      "deadline_hint": "",
+      "status": "open",
+      "created_at": "2026-03-16T01:18:04"
+    },
+    {
+      "id": "todo-20260316003904",
+      "title": "这是一个每日作战任务。资料位置：D:\\Project\\data\\ads\\exp.csv`n请登记一条新的待办。`n写清事项、阻塞点、回传结果。",
+      "source": "workbench_frontend",
+      "deadline_hint": "",
+      "status": "open",
+      "created_at": "2026-03-16T00:39:04"
+    }
+  ],
   "feedback": [],
   "alerts": [
+    {
+      "id": "alert-20260316003904",
+      "title": "这是一个广告专项任务。资料位置：https://www.notion.so/test`n请记录一条数据告警。`n写清异常",
+      "detail": "这是一个广告专项任务。资料位置：https://www.notion.so/test`n请记录一条数据告警。`n写清异常指标、波动情况、初步判断、下一步排查动作。",
+      "source": "workbench_frontend",
+      "severity": "high",
+      "status": "open",
+      "created_at": "2026-03-16T00:39:04"
+    },
     {
       "id": "alert-20260315201858",
       "title": "测试告警",
