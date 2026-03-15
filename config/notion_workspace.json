@@ -1,0 +1,44 @@
+{
+  "role": "knowledge_hub",
+  "primary_use_cases": [
+    "需求卡片",
+    "PRD 版本记录",
+    "广告实验归档",
+    "数据分析报告",
+    "每日作战沉淀",
+    "竞品观察"
+  ],
+  "not_suitable_for": [
+    "高保真原型",
+    "最终 Wiki 发布格式",
+    "复杂图片与表格混排的最终展示"
+  ],
+  "recommended_databases": [
+    {
+      "name": "需求卡片库",
+      "content_types": ["intake", "requirement_card"]
+    },
+    {
+      "name": "PRD 库",
+      "content_types": ["prd", "version_record"]
+    },
+    {
+      "name": "广告实验库",
+      "content_types": ["experiment_design", "experiment_review"]
+    },
+    {
+      "name": "数据分析库",
+      "content_types": ["analysis_report", "data_design"]
+    },
+    {
+      "name": "每日作战库",
+      "content_types": ["daily_brief", "alert", "deadline"]
+    }
+  ],
+  "publish_flow": [
+    "local_workspace",
+    "feishu_review",
+    "notion_archive",
+    "company_wiki"
+  ]
+}

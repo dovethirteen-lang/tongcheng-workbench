@@ -1,0 +1,21 @@
+{
+  "entry_mode": "feishu_app_first",
+  "app_id": "REPLACE_WITH_FEISHU_APP_ID",
+  "app_secret": "REPLACE_WITH_FEISHU_APP_SECRET",
+  "docx_folder_token": "",
+  "command_channel": "飞书",
+  "notify_channel": "飞书",
+  "document_channel": "飞书云文档",
+  "archive_channel": "Notion",
+  "features": {
+    "receive_messages": true,
+    "reply_messages": true,
+    "write_docx": true,
+    "write_feishu_doc": true,
+    "write_notion": true
+  },
+  "security_notes": [
+    "本文件应仅保存在本机，不提交到代码仓库。",
+    "建议使用自建应用，不直接在聊天里传递 app_secret。"
+  ]
+}

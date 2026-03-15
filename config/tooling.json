@@ -1,0 +1,24 @@
+{
+  "python": "py",
+  "pdf_tools": {
+    "pdftoppm": "C:\\Users\\Administrator\\AppData\\Local\\Microsoft\\WinGet\\Packages\\oschwartz10612.Poppler_Microsoft.Winget.Source_8wekyb3d8bbwe\\poppler-25.07.0\\Library\\bin\\pdftoppm.exe",
+    "tesseract": "C:\\Program Files\\Tesseract-OCR\\tesseract.exe",
+    "soffice": "C:\\Program Files\\LibreOffice\\program\\soffice.exe"
+  },
+  "browser_tools": {
+    "playwright_cli": "playwright-cli",
+    "preview_url": "http://127.0.0.1:4173"
+  },
+  "local_workspace": {
+    "project_root": "D:\\Project",
+    "docs_root": "D:\\Project\\docs",
+    "data_root": "D:\\Project\\data",
+    "scripts_root": "D:\\Project\\scripts",
+    "runtime_root": "D:\\Project\\runtime",
+    "notes": "本地过程资产统一归档到 D:\\Project"
+  },
+  "notion": {
+    "role": "定稿后的知识沉淀与归档层",
+    "status": "manual-first"
+  }
+}

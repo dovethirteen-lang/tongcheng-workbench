@@ -1,0 +1,17 @@
+{
+  "entry_mode": "enterprise_wecom_app",
+  "command_channel": "企业微信",
+  "notify_channel": "企业微信",
+  "development_gateway": {
+    "host": "127.0.0.1",
+    "port": 8787,
+    "healthcheck": "http://127.0.0.1:8787/health"
+  },
+  "production_todo": [
+    "补企业微信内部应用配置",
+    "补回调 URL 与消息验签",
+    "补 access_token 获取与消息回发",
+    "补飞书 / Notion / 本地执行结果回传"
+  ]
+}
+

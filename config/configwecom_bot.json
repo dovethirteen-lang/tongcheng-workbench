@@ -1,0 +1,18 @@
+{
+  "entry_mode": "wecom_ai_bot_long_connection",
+  "bot_id": "REPLACE_WITH_BOT_ID",
+  "secret": "REPLACE_WITH_NEW_SECRET",
+  "notify_channel": "企业微信智能机器人",
+  "command_channel": "企业微信智能机器人",
+  "features": {
+    "read_commands": true,
+    "send_replies": true,
+    "write_feishu_doc": false,
+    "write_notion": false
+  },
+  "security_notes": [
+    "不要把真实 secret 发到聊天中",
+    "截图泄露后应立即刷新 secret",
+    "本文件应仅保存在本机，不提交到代码仓库"
+  ]
+}
