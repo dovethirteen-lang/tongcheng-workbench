@@ -306,6 +306,33 @@ function renderCommands(items) {
   return renderTable(items, ["task_type", "source", "created_at"], "暂无命令记录");
 }
 
+function renderDocuments(items) {
+  const node = document.getElementById("docList");
+  if (!items.length) {
+    node.innerHTML = '<p class="empty">暂无文档记录</p>';
+    return;
+  }
+  node.innerHTML = items.map((item, index) => {
+    const url = item.document_url || "";
+    const revisionCount = Array.isArray(item.revisions) ? item.revisions.length : 0;
+    return `
+      <div class="history-card doc-card">
+        <div class="history-head">
+          <strong>${escapeHtml(item.title || `文档 ${index + 1}`)}</strong>
+          <span class="badge">${escapeHtml(item.status || "draft")}</span>
+        </div>
+        <p>类型：${escapeHtml(item.task_type || "未标记")} · 修改轮次：${revisionCount}</p>
+        <div class="history-meta">${escapeHtml(url)}</div>
+        <div class="history-actions">
+          ${url ? `<a class="ghost small link-button" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">打开文档</a>` : ""}
+          ${url ? `<button type="button" class="ghost small" data-doc-revise="${escapeHtml(url)}">继续修改</button>` : ""}
+          ${url ? `<button type="button" class="ghost small" data-doc-finalize="${escapeHtml(url)}">确定定稿</button>` : ""}
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
 function showToast(message) {
   const toast = document.getElementById("toast");
   toast.textContent = message;
@@ -482,6 +509,42 @@ function wireHistoryActions() {
   });
 }
 
+function wireDocumentActions() {
+  const node = document.getElementById("docList");
+  node.addEventListener("click", (event) => {
+    const reviseUrl = event.target.getAttribute("data-doc-revise");
+    const finalizeUrl = event.target.getAttribute("data-doc-finalize");
+    if (!reviseUrl && !finalizeUrl) {
+      return;
+    }
+    if (reviseUrl) {
+      openModal(
+        "继续修改文档",
+        [
+          `请按我在这个飞书文档里的最新备注继续修改：${reviseUrl}`,
+          "如果备注不完整，请结合文档当前内容补全修改。",
+          "修改完成后把更新后的飞书文档链接回给我。",
+        ].join("\n"),
+        "revise_doc",
+        currentLane || document.getElementById("composerLane").value || "general",
+        "prd_draft"
+      );
+      return;
+    }
+    openModal(
+      "确定定稿",
+      [
+        `这个飞书文档已经确认定稿：${finalizeUrl}`,
+        "请进入 Notion 归档，并生成 Wiki 中间稿。",
+        "完成后把归档结果和 Wiki 中间稿路径回给我。",
+      ].join("\n"),
+      "finalize",
+      currentLane || document.getElementById("composerLane").value || "general",
+      "finalize"
+    );
+  });
+}
+
 async function reloadWorkbench() {
   try {
     await detectApi();
@@ -587,6 +650,24 @@ function bindQuickButtons() {
     );
   });
 
+  document.getElementById("btnTodoFromShot").addEventListener("click", () => {
+    document.getElementById("composerLane").value = "daily_ops";
+    document.getElementById("composerAction").value = "todo";
+    saveComposerDraft();
+    openModal(
+      "截图登记待办",
+      [
+        "登记一条新的待办。",
+        "如果来源是企业微信聊天记录，请把聊天截图一起带上。",
+        "请结合聊天截图和补充说明，拆成可执行的待办项。",
+        "写清事项、截止时间、当前阻塞点、需要我回传的结果。",
+      ].join("\n"),
+      "todo_from_shot",
+      "daily_ops",
+      "todo"
+    );
+  });
+
   document.getElementById("btnNewTodo").addEventListener("click", () => {
     openModal(
       "登记待办",
@@ -626,6 +707,7 @@ function wireActions() {
   bindQuickButtons();
   applyTemplatesToComposer();
   wireHistoryActions();
+  wireDocumentActions();
 
   document.querySelectorAll("#composerLane, #composerAction, #composerLink, #composerScreenshot, #composerDeadline, #composerNotes")
     .forEach((node) => {
@@ -665,7 +747,7 @@ function bind(data) {
 
   document.getElementById("alertList").innerHTML = renderAlerts(data.alerts);
   document.getElementById("todoList").innerHTML = renderTable(data.todos, ["title", "deadline_hint", "status"], "暂无待办");
-  document.getElementById("docList").innerHTML = renderTable(data.documents, ["title", "status", "document_url"], "暂无文档记录");
+  renderDocuments(data.documents);
   document.getElementById("commandList").innerHTML = renderCommands(data.commands);
   document.getElementById("capabilityList").innerHTML = renderChips(data.capabilities);
   document.getElementById("releaseList").innerHTML = renderRelease(data.release_plan);

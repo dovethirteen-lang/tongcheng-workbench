@@ -338,6 +338,10 @@ h2 {
   border: 1px solid var(--line);
 }
 
+.doc-card {
+  background: linear-gradient(180deg, #fbfdff 0%, #f5f9ff 100%);
+}
+
 .history-head,
 .history-actions {
   display: flex;
@@ -353,12 +357,20 @@ h2 {
 .history-meta {
   color: var(--muted);
   font-size: 12px;
+  word-break: break-all;
 }
 
 .small {
   padding: 8px 10px;
   font-size: 12px;
   border-radius: 10px;
+}
+
+.link-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
 }
 
 .chip-wrap {

@@ -27,6 +27,7 @@ def main() -> None:
         "todos": state.get("todos", [])[:8],
         "feedback": state.get("feedback", [])[:8],
         "alerts": state.get("alerts", [])[:8],
+        "last_result": state.get("last_result", {}),
         "capabilities": state.get("capabilities", {}),
         "release_plan": state.get("release_plan", {}),
         "notion_config": {
