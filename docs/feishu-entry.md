@@ -1,67 +1,76 @@
-# 飞书主入口联调说明
+# 飞书主入口说明
 
-当前第一阶段已经切到“飞书主入口”模式：
+当前第一阶段已经切到“飞书主入口”模式。
 
-- 你在飞书里发命令
-- 主控层解析命令并落盘
-- 结果先通过飞书文本消息回执
-- 适合文档化的任务自动生成飞书草稿
-- 只有在定稿或发布阶段，才进入 Notion 归档
+## 角色分工
 
-## 已完成能力
+- `飞书`
+  - 主命令入口
+  - 回执入口
+  - 文档协作区
 
-- 飞书应用 `tenant_access_token` 校验通过
-- 飞书长连接客户端已完成
-- 飞书消息进入主控解析已完成
-- 适合文档化的任务会自动生成飞书云文档草稿
-- Notion 归档改成“显式触发”
-- 本地命令与回执已统一落到 `D:\Project\runtime\command_bus`
-- 本地长连接运行日志落到 `D:\Project\runtime\feishu_longconn`
+- `飞书云文档`
+  - 需求卡片
+  - PRD 草稿
+  - 多轮批注修订
 
-## 本地运行命令
+- `Notion`
+  - 定稿后归档
+  - 待办池和反馈池沉淀
 
-```powershell
-cd D:\CodeX\工作流设计\同程产品工作台
-py .\scripts\validate_feishu_app.py
-py .\scripts\run_feishu_longconn.py --log-level INFO
-py .\scripts\generate_feishu_doc_draft.py --command-file .\tmp\commands\YOUR_COMMAND.json --reply-file D:\Project\runtime\command_bus\outbox\YOUR_REPLY.json
-py .\scripts\process_notion_queue.py
-```
+## 当前策略
 
-## 飞书后台配置
+### 飞书目录
 
-在飞书开放平台的事件订阅页：
+你已经给应用开了完整权限，但飞书文档目录现在还是空的。
 
-1. 选择 `使用长连接 接收事件`
-2. 点击 `保存`
-3. 勾选消息接收相关事件
-4. 在应用权限里确认已经开通收发消息能力
-5. 重新发布应用版本
+当前先按这条策略执行：
 
-## 当前工作流
+- 文档先按系统默认可写位置创建
+- 模板结构按 Notion 的 PRD 模板和示例对齐
+- 后续在使用中再细化成正式文件夹结构
+
+如果后面你希望固定目录，只需要再提供飞书文件夹 token，我们就可以写入 `config/feishu_app.json` 的 `docx_folder_token`。
+
+### 协作规则
+
+- 新需求：先生成飞书需求卡片或 PRD 草稿
+- 文档修改：直接读取飞书文档链接和你的批注指令继续修改
+- 定稿：你在飞书里输入 `确定定稿` 或同义指令
+- 定稿后：进入 Notion 归档和 Wiki 中间稿链路
+
+## 每日待办与需求收集
+
+第一阶段不强行做完整飞书前台应用，先按下面的轻规则执行：
+
+- 待办：消息中带 `待办 / 提醒 / deadline / 跟进` 时进入本地待办池
+- 反馈：消息中带 `反馈 / bug / 问题 / 优化建议 / 迭代` 时进入反馈池
+- 需求：带链接、文档、PRD、方案等描述时进入主控解析
+
+后续再升级成飞书 Block 形式的每日作战首页。
+
+## 数据告警
+
+已经纳入当前版本规划。
+
+第一阶段先做：
+
+- 告警信息有入口
+- 告警信息能沉淀
+- 告警可以进入待办或每日作战链路
+
+后续再补自动阈值和定时监控。
+
+## 当前主链
 
 ### 草稿阶段
 
 `飞书命令 -> 主控解析 -> 飞书草稿 -> 飞书回执`
 
-这时不会归档到 Notion。
+### 修订阶段
+
+`飞书文档链接 + 修改指令 -> 主控识别为修订任务 -> 写回原文档 -> 飞书回执`
 
 ### 定稿阶段
 
-`飞书命令(含定稿/归档/发布指令) -> 主控解析 -> Notion 队列 -> Wiki 发布准备`
-
-## 本地产物位置
-
-- 命令日志：`D:\CodeX\工作流设计\同程产品工作台\tmp\commands`
-- 回执队列：`D:\Project\runtime\command_bus\outbox`
-- 长连接日志：`D:\Project\runtime\feishu_longconn\events.log`
-- 飞书草稿默认创建在应用可写的位置；如需指定文件夹，可在 `config/feishu_app.json` 里填写 `docx_folder_token`
-- Notion 队列：`D:\Project\runtime\notion_queue`
-- Notion Markdown 渲染目录：`D:\Project\docs\notion_queue`
-
-## 当前边界
-
-- 现在已经能做到“飞书收命令 -> 主控解析 -> 飞书文本回执”
-- 已经能自动创建飞书云文档草稿，但还没做复杂表格和图片写入
-- Notion 不再默认每次修改都归档
-- 只有显式进入归档/定稿/发布阶段，才会生成 Notion 归档队列
+`飞书命令（确定定稿 / 归档 / 发布） -> 主控解析 -> Notion 归档队列 + Wiki 中间稿`

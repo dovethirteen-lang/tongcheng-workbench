@@ -1,12 +1,18 @@
 {
   "role": "knowledge_hub",
+  "workspace_name": "CodeX 工作空间",
+  "workspace_url": "https://www.notion.so/CodeX-324f5ddf267f80feae59e5fb698ab200?source=copy_link",
+  "private_library_url": "https://www.notion.so/library/private?spaceId=f14f5ddf267f81c994460003a1492bbb",
+  "prd_template_url": "https://www.notion.so/603c8f5d5f57415d8ea9f812ea7c81ea?source=copy_link",
+  "prd_example_url": "https://www.notion.so/410bc0aa8daa4c3abfc109a620868d6a",
   "primary_use_cases": [
     "需求卡片",
     "PRD 版本记录",
     "广告实验归档",
     "数据分析报告",
     "每日作战沉淀",
-    "竞品观察"
+    "竞品观察",
+    "反馈池"
   ],
   "not_suitable_for": [
     "高保真原型",
@@ -15,26 +21,51 @@
   ],
   "recommended_databases": [
     {
-      "name": "需求卡片库",
-      "content_types": ["intake", "requirement_card"]
+      "name": "Inbox收件箱",
+      "content_types": ["input", "raw_requirement", "feedback_entry"]
     },
     {
-      "name": "PRD 库",
-      "content_types": ["prd", "version_record"]
+      "name": "CodeX归档",
+      "content_types": ["archive_hub", "release_record", "assistant_iteration"]
     },
     {
-      "name": "广告实验库",
-      "content_types": ["experiment_design", "experiment_review"]
+      "name": "工作分区",
+      "content_types": ["workbench_status", "daily_ops", "todo_pool", "data_alert"]
     },
     {
-      "name": "数据分析库",
-      "content_types": ["analysis_report", "data_design"]
+      "name": "知识库",
+      "content_types": ["knowledge_hub", "reference", "template"]
     },
     {
-      "name": "每日作战库",
-      "content_types": ["daily_brief", "alert", "deadline"]
+      "name": "广告专项",
+      "content_types": ["experiment_design", "experiment_review", "analysis_report", "data_design"]
+    },
+    {
+      "name": "微信流量提效",
+      "content_types": ["requirement_card", "prd", "version_record", "growth_project"]
+    },
+    {
+      "name": "多平台项目",
+      "content_types": ["platform_plan", "integration_requirement", "external_doc_summary"]
     }
   ],
+  "todo_strategy": {
+    "mode": "single_pool",
+    "database": "工作分区",
+    "entry_name": "待办池",
+    "notes": "早期统一进一个池，后续再按项目拆分。"
+  },
+  "feedback_strategy": {
+    "database": "Inbox收件箱",
+    "entry_name": "工作台反馈",
+    "categories": ["bug", "experience_issue", "new_requirement"],
+    "notes": "先在 Notion 里收口，后续再功能化到工作台。"
+  },
+  "archive_rules": {
+    "only_archive_when_finalized": true,
+    "finalize_command": "我在飞书中输入“确定定稿”或同义指令",
+    "also_generate_wiki_handoff": true
+  },
   "publish_flow": [
     "local_workspace",
     "feishu_review",

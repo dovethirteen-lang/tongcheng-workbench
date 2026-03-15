@@ -22,6 +22,7 @@ class WorkbenchState:
         payload.setdefault("documents", [])
         payload.setdefault("todos", [])
         payload.setdefault("feedback", [])
+        payload.setdefault("alerts", [])
         payload["capabilities"] = defaults["capabilities"]
         payload["release_plan"] = defaults["release_plan"]
         self._write(payload)
@@ -33,12 +34,14 @@ class WorkbenchState:
             "documents": [],
             "todos": [],
             "feedback": [],
+            "alerts": [],
             "capabilities": {
                 "feishu_entry": "ready",
                 "feishu_doc_draft": "ready",
                 "revision_loop": "ready",
                 "notion_archive": "manual-finalize",
                 "daily_ops_panel": "planned",
+                "data_alerts": "basic-ready",
                 "enterprise_wecom_entry": "deferred",
             },
             "release_plan": {
@@ -134,17 +137,33 @@ class WorkbenchState:
         self._write(payload)
         return item
 
-    def record_feedback(self, title: str, detail: str, source: str) -> dict[str, Any]:
+    def record_feedback(self, title: str, detail: str, source: str, category: str = "experience_issue") -> dict[str, Any]:
         payload = self._read()
         item = {
             "id": f"fb-{datetime.now().strftime('%Y%m%d%H%M%S')}",
             "title": title,
             "detail": detail,
+            "category": category,
             "source": source,
             "status": "new",
             "created_at": datetime.now().isoformat(timespec="seconds"),
         }
         payload["feedback"] = [item] + payload.get("feedback", [])
+        self._write(payload)
+        return item
+
+    def record_alert(self, title: str, detail: str, source: str, severity: str = "medium") -> dict[str, Any]:
+        payload = self._read()
+        item = {
+            "id": f"alert-{datetime.now().strftime('%Y%m%d%H%M%S')}",
+            "title": title,
+            "detail": detail,
+            "source": source,
+            "severity": severity,
+            "status": "open",
+            "created_at": datetime.now().isoformat(timespec="seconds"),
+        }
+        payload["alerts"] = [item] + payload.get("alerts", [])
         self._write(payload)
         return item
 

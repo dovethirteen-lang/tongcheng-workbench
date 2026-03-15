@@ -32,6 +32,7 @@ def main() -> None:
     documents = state.get("documents", [])[:8]
     todos = state.get("todos", [])[:8]
     feedback = state.get("feedback", [])[:8]
+    alerts = state.get("alerts", [])[:8]
     capabilities = state.get("capabilities", {})
     release_plan = state.get("release_plan", {})
 
@@ -119,6 +120,7 @@ def main() -> None:
     <div class="meta-card">文档数量<strong>{len(documents)}</strong></div>
     <div class="meta-card">打开待办<strong>{len([x for x in todos if x.get("status") == "open"])}</strong></div>
     <div class="meta-card">反馈池<strong>{len(feedback)}</strong></div>
+    <div class="meta-card">数据告警<strong>{len(alerts)}</strong></div>
   </div>
   <div class="grid">
     <section class="panel">
@@ -144,6 +146,10 @@ def main() -> None:
     <section class="panel">
       <h2>反馈池</h2>
       {_render_list(feedback, ["title", "status", "source"], "暂无反馈")}
+    </section>
+    <section class="panel">
+      <h2>数据告警</h2>
+      {_render_list(alerts, ["title", "severity", "status"], "暂无数据告警")}
     </section>
   </div>
 </body>

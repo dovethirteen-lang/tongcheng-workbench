@@ -92,6 +92,10 @@ class CommandService:
         if notion_archive.get("queue_file"):
             lines.extend(["", f"已进入 Notion 归档队列：{notion_archive['queue_file']}"])
 
+        wiki_handoff = reply.get("wiki_handoff") or {}
+        if wiki_handoff.get("path"):
+            lines.extend(["", f"Wiki 中间稿：{wiki_handoff['path']}"])
+
         todo = reply.get("todo_item") or {}
         if todo.get("title"):
             lines.extend(["", f"已登记待办：{todo['title']}"])
@@ -99,6 +103,10 @@ class CommandService:
         feedback = reply.get("feedback_item") or {}
         if feedback.get("title"):
             lines.extend(["", f"已记录反馈：{feedback['title']}"])
+
+        alert = reply.get("alert_item") or {}
+        if alert.get("title"):
+            lines.extend(["", f"已记录数据告警：{alert['title']}"])
 
         status_page = reply.get("status_page") or {}
         if status_page.get("path"):

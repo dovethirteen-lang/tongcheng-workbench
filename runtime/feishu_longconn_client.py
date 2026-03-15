@@ -18,11 +18,13 @@ from .feishu_docx import (
     should_create_doc_draft,
 )
 from .notion_archive import enqueue_notion_archive, should_archive_to_notion
+from .wiki_handoff import create_wiki_handoff
 from .workbench_state import WorkbenchState
 
 
 TODO_KEYWORDS = ["待办", "todo", "提醒", "deadline", "排期", "跟进"]
 FEEDBACK_KEYWORDS = ["反馈", "bug", "问题", "优化建议", "迭代", "不好用"]
+ALERT_KEYWORDS = ["告警", "异常", "波动", "下降", "暴跌", "预警", "监控"]
 
 
 def _extract_text(content: str | None) -> str:
@@ -50,13 +52,7 @@ class FeishuLongConnectionApp:
             event_handler=self._build_event_handler(),
             log_level=self.log_level,
         )
-        self._write_runtime_log(
-            {
-                "level": "info",
-                "stage": "init",
-                "message": "Feishu long connection client initialized.",
-            }
-        )
+        self._write_runtime_log({"level": "info", "stage": "init", "message": "Feishu long connection client initialized."})
 
     def _build_event_handler(self) -> lark.EventDispatcherHandler:
         return (
@@ -171,9 +167,14 @@ class FeishuLongConnectionApp:
         if feedback_item:
             reply["feedback_item"] = feedback_item
 
+        alert_item = self._maybe_capture_alert(parsed)
+        if alert_item:
+            reply["alert_item"] = alert_item
+
         if should_archive_to_notion(parsed):
             queue_path = enqueue_notion_archive(self.base_dir, parsed, reply)
             reply["notion_archive"] = {"queue_file": str(queue_path)}
+            reply["wiki_handoff"] = {"path": str(create_wiki_handoff(parsed, reply))}
             document_id = extract_document_id(parsed.normalized_text)
             if document_id:
                 self.state.mark_document_final(document_id)
@@ -216,12 +217,29 @@ class FeishuLongConnectionApp:
 
     def _maybe_capture_feedback(self, parsed: Any) -> dict[str, Any] | None:
         text = parsed.normalized_text.lower()
-        if not any(keyword in text for keyword in FEEDBACK_KEYWORDS):
+        matched = next((keyword for keyword in FEEDBACK_KEYWORDS if keyword in text), None)
+        if not matched:
             return None
+        category = "bug" if "bug" in text else "experience_issue"
+        if "新需求" in parsed.normalized_text:
+            category = "new_requirement"
         return self.state.record_feedback(
             title=parsed.normalized_text[:60],
             detail=parsed.normalized_text,
             source=parsed.source,
+            category=category,
+        )
+
+    def _maybe_capture_alert(self, parsed: Any) -> dict[str, Any] | None:
+        text = parsed.normalized_text.lower()
+        if not any(keyword in text for keyword in ALERT_KEYWORDS):
+            return None
+        severity = "high" if any(token in text for token in ["暴跌", "异常", "预警"]) else "medium"
+        return self.state.record_alert(
+            title=parsed.normalized_text[:60],
+            detail=parsed.normalized_text,
+            source=parsed.source,
+            severity=severity,
         )
 
     def _send_reply(self, receive_id: str, reply: dict[str, Any]) -> None:
@@ -238,13 +256,7 @@ class FeishuLongConnectionApp:
             fh.write(line + "\n")
 
     def start(self) -> None:
-        self._write_runtime_log(
-            {
-                "level": "info",
-                "stage": "start",
-                "message": "Feishu long connection client starting.",
-            }
-        )
+        self._write_runtime_log({"level": "info", "stage": "start", "message": "Feishu long connection client starting."})
         self.ws_client.start()
 
     async def connect_and_hold(self) -> None:
