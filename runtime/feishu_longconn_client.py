@@ -9,8 +9,20 @@ import lark_oapi as lark
 
 from .command_service import CommandService
 from .feishu_client import FeishuAPIError, load_feishu_config, send_text_message
-from .feishu_docx import FeishuDocxError, create_doc_draft, should_create_doc_draft
+from .feishu_docx import (
+    FeishuDocxError,
+    append_revision_request,
+    create_doc_draft,
+    extract_document_id,
+    is_revision_request,
+    should_create_doc_draft,
+)
 from .notion_archive import enqueue_notion_archive, should_archive_to_notion
+from .workbench_state import WorkbenchState
+
+
+TODO_KEYWORDS = ["待办", "todo", "提醒", "deadline", "排期", "跟进"]
+FEEDBACK_KEYWORDS = ["反馈", "bug", "问题", "优化建议", "迭代", "不好用"]
 
 
 def _extract_text(content: str | None) -> str:
@@ -28,6 +40,7 @@ class FeishuLongConnectionApp:
         self.base_dir = base_dir
         self.config = load_feishu_config(base_dir)
         self.command_service = CommandService(base_dir)
+        self.state = WorkbenchState()
         self.runtime_root = Path(r"D:\Project\runtime\feishu_longconn")
         self.runtime_root.mkdir(parents=True, exist_ok=True)
         self.log_level = getattr(lark.LogLevel, log_level.upper(), lark.LogLevel.INFO)
@@ -89,6 +102,7 @@ class FeishuLongConnectionApp:
                 "text": text,
             }
         )
+
         reply_target = {
             "sender_open_id": sender_open_id,
             "chat_id": message.chat_id or "",
@@ -99,32 +113,70 @@ class FeishuLongConnectionApp:
             source="feishu_longconn",
             reply_target=reply_target,
         )
+        self.state.record_command(parsed)
+
         reply = self.command_service.read_reply(reply_path)
+
         if should_create_doc_draft(parsed):
             try:
-                reply["doc_draft"] = create_doc_draft(self.base_dir, parsed, reply)
-                self.command_service.save_reply(reply_path, reply)
+                doc_draft = create_doc_draft(self.base_dir, parsed, reply)
+                reply["doc_draft"] = doc_draft
+                self.state.record_document(
+                    {
+                        "document_id": doc_draft["document_id"],
+                        "document_url": doc_draft["url"],
+                        "title": doc_draft["title"],
+                        "task_type": parsed.task_type,
+                        "status": "draft",
+                        "created_at": parsed.created_at,
+                        "source_command_id": parsed.command_id,
+                        "revisions": [],
+                    }
+                )
                 self._write_runtime_log(
                     {
                         "level": "info",
                         "stage": "doc_draft",
                         "message": "Feishu doc draft created.",
-                        "document_id": reply["doc_draft"].get("document_id", ""),
-                        "url": reply["doc_draft"].get("url", ""),
+                        "document_id": doc_draft["document_id"],
+                        "url": doc_draft["url"],
                     }
                 )
             except FeishuDocxError as exc:
-                self._write_runtime_log(
-                    {
-                        "level": "error",
-                        "stage": "doc_draft",
-                        "message": str(exc),
-                    }
-                )
+                self._write_runtime_log({"level": "error", "stage": "doc_draft", "message": str(exc)})
+
+        if is_revision_request(parsed):
+            document_id = extract_document_id(parsed.normalized_text)
+            if document_id:
+                try:
+                    revision_index = self.state.append_revision(document_id, parsed.normalized_text)
+                    reply["revision_request"] = append_revision_request(self.base_dir, parsed, revision_index)
+                    self._write_runtime_log(
+                        {
+                            "level": "info",
+                            "stage": "revision",
+                            "message": "Revision request appended to Feishu doc.",
+                            "document_id": document_id,
+                            "revision_index": revision_index,
+                        }
+                    )
+                except FeishuDocxError as exc:
+                    self._write_runtime_log({"level": "error", "stage": "revision", "message": str(exc)})
+
+        todo_item = self._maybe_capture_todo(parsed)
+        if todo_item:
+            reply["todo_item"] = todo_item
+
+        feedback_item = self._maybe_capture_feedback(parsed)
+        if feedback_item:
+            reply["feedback_item"] = feedback_item
+
         if should_archive_to_notion(parsed):
             queue_path = enqueue_notion_archive(self.base_dir, parsed, reply)
             reply["notion_archive"] = {"queue_file": str(queue_path)}
-            self.command_service.save_reply(reply_path, reply)
+            document_id = extract_document_id(parsed.normalized_text)
+            if document_id:
+                self.state.mark_document_final(document_id)
             self._write_runtime_log(
                 {
                     "level": "info",
@@ -133,6 +185,13 @@ class FeishuLongConnectionApp:
                     "queue_file": str(queue_path),
                 }
             )
+
+        status_page = Path(r"D:\Project\runtime\workbench_status.html")
+        if status_page.exists():
+            reply["status_page"] = {"path": str(status_page)}
+
+        self.command_service.save_reply(reply_path, reply)
+
         self._write_runtime_log(
             {
                 "command_id": parsed.command_id,
@@ -144,6 +203,26 @@ class FeishuLongConnectionApp:
         )
         if sender_open_id:
             self._send_reply(sender_open_id, reply)
+
+    def _maybe_capture_todo(self, parsed: Any) -> dict[str, Any] | None:
+        text = parsed.normalized_text.lower()
+        if not any(keyword in text for keyword in TODO_KEYWORDS):
+            return None
+        return self.state.record_todo(
+            title=parsed.normalized_text[:80],
+            source=parsed.source,
+            deadline_hint=parsed.deadline_hint,
+        )
+
+    def _maybe_capture_feedback(self, parsed: Any) -> dict[str, Any] | None:
+        text = parsed.normalized_text.lower()
+        if not any(keyword in text for keyword in FEEDBACK_KEYWORDS):
+            return None
+        return self.state.record_feedback(
+            title=parsed.normalized_text[:60],
+            detail=parsed.normalized_text,
+            source=parsed.source,
+        )
 
     def _send_reply(self, receive_id: str, reply: dict[str, Any]) -> None:
         text = self.command_service.format_reply_text(reply)

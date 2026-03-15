@@ -32,7 +32,7 @@ class CommandRouter:
         self.config_path = config_path
         self._config = json.loads(config_path.read_text(encoding="utf-8"))
 
-    def parse_command(self, text: str, source: str = "wecom") -> ParsedCommand:
+    def parse_command(self, text: str, source: str = "feishu") -> ParsedCommand:
         normalized = re.sub(r"\s+", " ", text).strip()
         lowered = normalized.lower()
         matched_routes: list[dict[str, Any]] = []
@@ -84,11 +84,11 @@ class CommandRouter:
         if not matched_routes:
             return "general"
         first_target = " ".join(matched_routes[0].get("route_to", []))
-        if "实验" in first_target or "商业分析师" in first_target:
+        if "实验设计" in first_target or "商业分析师" in first_target:
             return "ads_experiment"
         if "增长" in first_target:
             return "wechat_growth"
-        if "平台" in first_target:
+        if "平台产品" in first_target:
             return "platform_integration"
         if "Notion" in first_target:
             return "knowledge_archive"
@@ -119,7 +119,6 @@ class CommandRouter:
             r"[A-Za-z]:\\[^\n]+",
             r"\bnotion\b",
             r"\bfeishu\b",
-            r"\b企业微信\b",
             r"\bpdf\b",
         ]
         for pattern in patterns:
@@ -175,7 +174,7 @@ class CommandRouter:
         if task_type == "ads_experiment":
             actions.append("如涉及本地数据目录，先校验文件结构和字段完整性。")
         if task_type in {"wechat_growth", "platform_integration"}:
-            actions.append("如需协作评审，先生成飞书云文档中间稿再通知用户。")
+            actions.append("如需协作评审，先生成飞书云文档草稿再通知用户。")
         if deadline_hint:
             actions.append(f"在 {deadline_hint} 前通过当前消息入口回传处理结果或阶段进度。")
         else:

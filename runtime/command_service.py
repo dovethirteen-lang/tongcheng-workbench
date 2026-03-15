@@ -25,7 +25,7 @@ class CommandService:
     def accept_text(
         self,
         text: str,
-        source: str = "wecom_ai_bot",
+        source: str = "feishu_longconn",
         reply_target: dict[str, str] | None = None,
     ) -> tuple[ParsedCommand, Path, Path]:
         parsed = self.router.parse_command(text=text, source=source)
@@ -44,7 +44,7 @@ class CommandService:
         for path in sorted(self.inbox_dir.glob("*.json")):
             payload = json.loads(path.read_text(encoding="utf-8"))
             text = str(payload.get("text", "")).strip()
-            source = str(payload.get("source", "wecom_ai_bot"))
+            source = str(payload.get("source", "feishu_longconn"))
             if not text:
                 continue
             reply_target = {
@@ -52,11 +52,7 @@ class CommandService:
                 "chat_id": str(payload.get("chat_id", "") or ""),
                 "source": source,
             }
-            parsed, command_path, reply_path = self.accept_text(
-                text=text,
-                source=source,
-                reply_target=reply_target,
-            )
+            parsed, command_path, reply_path = self.accept_text(text=text, source=source, reply_target=reply_target)
             target = self.processed_dir / path.name
             path.replace(target)
             results.append(
@@ -76,13 +72,38 @@ class CommandService:
             "",
             "下一步：",
         ]
-        lines.extend(f"- {item}" for item in reply.get("next_actions", [])[:3])
+        lines.extend(f"- {item}" for item in reply.get("next_actions", [])[:4])
+
         doc_draft = reply.get("doc_draft") or {}
         if doc_draft.get("url"):
             lines.extend(["", f"飞书草稿：{doc_draft['url']}"])
+
+        revision = reply.get("revision_request") or {}
+        if revision.get("document_url"):
+            lines.extend(
+                [
+                    "",
+                    f"已写入修改记录：第 {revision.get('revision_index', 0)} 轮",
+                    f"当前文档：{revision['document_url']}",
+                ]
+            )
+
         notion_archive = reply.get("notion_archive") or {}
         if notion_archive.get("queue_file"):
-            lines.extend(["", f"Notion 归档队列：{notion_archive['queue_file']}"])
+            lines.extend(["", f"已进入 Notion 归档队列：{notion_archive['queue_file']}"])
+
+        todo = reply.get("todo_item") or {}
+        if todo.get("title"):
+            lines.extend(["", f"已登记待办：{todo['title']}"])
+
+        feedback = reply.get("feedback_item") or {}
+        if feedback.get("title"):
+            lines.extend(["", f"已记录反馈：{feedback['title']}"])
+
+        status_page = reply.get("status_page") or {}
+        if status_page.get("path"):
+            lines.extend(["", f"状态页：{status_page['path']}"])
+
         return "\n".join(line for line in lines if line is not None).strip()
 
     def read_reply(self, path: Path) -> dict[str, Any]:
