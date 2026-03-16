@@ -75,6 +75,19 @@ function renderApiStatus() {
   document.getElementById("modalHint").textContent = apiAvailable
     ? "当前已连接本地主控。你可以直接提交到后端，也可以保存到本地历史后再发给飞书助手。"
     : "当前是静态预览模式。你可以生成命令、保存到本地历史，或复制后发给飞书里的工作助手。";
+
+  const hint = document.getElementById("apiStatusHint");
+  if (hint) {
+    if (!apiAvailable && apiBase && window.location.protocol === "https:" && apiBase.startsWith("http://127.0.0.1")) {
+      hint.textContent = "检测到浏览器拦截：HTTPS 页面无法访问本地 HTTP，请点“打开本地直连版”。";
+      hint.classList.remove("hidden");
+    } else if (!apiAvailable && apiBase) {
+      hint.textContent = "本地主控未连接，请确认地址和服务已启动。";
+      hint.classList.remove("hidden");
+    } else {
+      hint.classList.add("hidden");
+    }
+  }
 }
 
 function metric(label, value, suffix = "") {
@@ -390,6 +403,14 @@ function openModal(title, command, intent = "", lane = "general", action = "gene
   document.getElementById("commandModal").classList.remove("hidden");
 }
 
+async function runOrModal(title, command, intent, lane, action) {
+  if (!apiAvailable) {
+    openModal(title, command, intent, lane, action);
+    return;
+  }
+  await submitTextCommand(command, intent, lane, action);
+}
+
 function closeModal() {
   currentIntent = "";
   currentLane = "general";
@@ -577,7 +598,7 @@ function wireDocumentActions() {
       return;
     }
     if (reviseUrl) {
-      openModal(
+      runOrModal(
         "继续修改文档",
         [
           `请按我在这个飞书文档里的最新备注继续修改：${reviseUrl}`,
@@ -590,7 +611,7 @@ function wireDocumentActions() {
       );
       return;
     }
-    openModal(
+    runOrModal(
       "确定定稿",
       [
         `这个飞书文档已经确认定稿：${finalizeUrl}`,
@@ -698,7 +719,7 @@ function applyTemplatesToComposer() {
 
 function bindQuickButtons() {
   document.getElementById("btnNewCard").addEventListener("click", () => {
-    openModal(
+    runOrModal(
       "新建需求卡片",
       [
         "读取这个 Notion / 飞书文档链接，先整理成需求卡片草稿，不要归档。",
@@ -712,7 +733,7 @@ function bindQuickButtons() {
   });
 
   document.getElementById("btnNewPrd").addEventListener("click", () => {
-    openModal(
+    runOrModal(
       "生成 PRD 草稿",
       [
         "按照这个需求卡片生成 PRD 草稿，不要归档。",
@@ -729,7 +750,7 @@ function bindQuickButtons() {
     document.getElementById("composerLane").value = "daily_ops";
     document.getElementById("composerAction").value = "todo";
     saveComposerDraft();
-    openModal(
+    runOrModal(
       "截图登记待办",
       [
         "登记一条新的待办。",
@@ -744,7 +765,7 @@ function bindQuickButtons() {
   });
 
   document.getElementById("btnNewTodo").addEventListener("click", () => {
-    openModal(
+    runOrModal(
       "登记待办",
       [
         "登记一条新的待办。",
@@ -758,7 +779,7 @@ function bindQuickButtons() {
   });
 
   document.getElementById("btnNewFeedback").addEventListener("click", () => {
-    openModal(
+    runOrModal(
       "提交反馈",
       [
         "记录一条工作台反馈。",
@@ -776,7 +797,7 @@ function bindQuickButtons() {
   });
 
   document.getElementById("btnDailyBrief").addEventListener("click", () => {
-    openModal(
+    runOrModal(
       "生成今日作战摘要",
       [
         "请生成今日作战摘要。",
@@ -790,7 +811,7 @@ function bindQuickButtons() {
   });
 
   document.getElementById("btnCompetitorBrief").addEventListener("click", () => {
-    openModal(
+    runOrModal(
       "生成竞品简报",
       [
         "请生成 OTA 竞品简报（美团/携程/飞猪/去哪儿）。",
@@ -804,7 +825,7 @@ function bindQuickButtons() {
   });
 
   document.getElementById("btnOpsChecklist").addEventListener("click", () => {
-    openModal(
+    runOrModal(
       "刷新待办与告警",
       [
         "请刷新今日待办与数据告警清单。",
