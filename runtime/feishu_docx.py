@@ -87,8 +87,10 @@ def should_create_doc_draft(parsed: ParsedCommand) -> bool:
         return False
     if parsed.task_type in {"wechat_growth", "platform_integration", "knowledge_archive"}:
         return True
+    if parsed.task_type == "daily_ops" and parsed.action == "analysis":
+        return True
     text = parsed.normalized_text
-    return any(token in text for token in ["PRD", "prd", "文档", "评审稿", "方案", "飞书"])
+    return any(token in text for token in ["PRD", "prd", "文档", "评审稿", "方案", "飞书", "简报", "摘要"])
 
 
 def create_doc_draft(base_dir: Path, parsed: ParsedCommand, reply: dict[str, Any]) -> dict[str, Any]:

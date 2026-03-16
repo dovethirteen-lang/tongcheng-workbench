@@ -63,7 +63,13 @@ async function detectApi() {
 function renderApiStatus() {
   const node = document.getElementById("apiStatus");
   node.className = `pill ${apiAvailable ? "success" : "neutral"}`;
-  node.textContent = apiAvailable ? "后端状态：已连接" : "后端状态：静态预览";
+  if (apiAvailable) {
+    node.textContent = "后端状态：已连接";
+  } else if (apiBase) {
+    node.textContent = "后端状态：连接失败";
+  } else {
+    node.textContent = "后端状态：静态预览";
+  }
   document.getElementById("btnSubmitCommand").disabled = !apiAvailable;
   document.getElementById("btnSubmitGenerated").disabled = !apiAvailable;
   document.getElementById("modalHint").textContent = apiAvailable
