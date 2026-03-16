@@ -24,6 +24,7 @@ class WorkbenchState:
         payload.setdefault("feedback", [])
         payload.setdefault("alerts", [])
         payload.setdefault("last_result", {})
+        payload.setdefault("activity", [])
         payload["capabilities"] = defaults["capabilities"]
         payload["release_plan"] = defaults["release_plan"]
         self._write(payload)
@@ -37,6 +38,7 @@ class WorkbenchState:
             "feedback": [],
             "alerts": [],
             "last_result": {},
+            "activity": [],
             "capabilities": {
                 "feishu_entry": "ready",
                 "feishu_doc_draft": "ready",
@@ -172,6 +174,19 @@ class WorkbenchState:
     def record_result(self, result: dict[str, Any]) -> None:
         payload = self._read()
         payload["last_result"] = result
+        activity = payload.get("activity", [])
+        activity.insert(
+            0,
+            {
+                "created_at": result.get("created_at", ""),
+                "summary": result.get("summary", ""),
+                "lane": result.get("lane", ""),
+                "action": result.get("action", ""),
+                "task_type": result.get("task_type", ""),
+                "status": "done" if not result.get("errors") else "error",
+            },
+        )
+        payload["activity"] = activity[:30]
         self._write(payload)
 
     def snapshot(self) -> dict[str, Any]:

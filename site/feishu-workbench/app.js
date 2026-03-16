@@ -353,6 +353,26 @@ function renderCommands(items) {
   return renderTable(items, ["task_type", "source", "created_at"], "暂无命令记录");
 }
 
+function renderActivity(items) {
+  const node = document.getElementById("activityList");
+  if (!node) {
+    return;
+  }
+  if (!items.length) {
+    node.innerHTML = '<p class="empty">暂无执行动态</p>';
+    return;
+  }
+  node.innerHTML = items.map((item) => `
+    <div class="history-card">
+      <div class="history-head">
+        <strong>${escapeHtml(item.summary || "已执行任务")}</strong>
+        <span class="badge ${item.status === "error" ? "danger" : "ok"}">${escapeHtml(item.status || "done")}</span>
+      </div>
+      <p>${escapeHtml(item.task_type || "")} · ${escapeHtml(item.lane || "")} · ${escapeHtml(item.action || "")}</p>
+      <div class="history-meta">${escapeHtml(item.created_at || "")}</div>
+    </div>
+  `).join("");
+}
 function renderDocuments(items) {
   const node = document.getElementById("docList");
   if (!items.length) {
@@ -903,6 +923,7 @@ function bind(data) {
   document.getElementById("todoList").innerHTML = renderTable(data.todos, ["title", "deadline_hint", "status"], "暂无待办");
   renderDocuments(data.documents);
   document.getElementById("commandList").innerHTML = renderCommands(data.commands);
+  renderActivity(data.activity || []);
   document.getElementById("capabilityList").innerHTML = renderChips(data.capabilities);
   document.getElementById("releaseList").innerHTML = renderRelease(data.release_plan);
   document.getElementById("configList").innerHTML = renderConfig(data);
