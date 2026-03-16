@@ -114,6 +114,12 @@ h2 {
   align-items: center;
 }
 
+.api-hint {
+  margin: 0;
+  font-size: 12px;
+  color: var(--warn);
+}
+
 .api-actions {
   display: flex;
   gap: 8px;
