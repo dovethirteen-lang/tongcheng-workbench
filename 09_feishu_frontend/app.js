@@ -313,14 +313,20 @@ function renderDocuments(items) {
     node.innerHTML = '<p class="empty">暂无文档记录</p>';
     return;
   }
+  const badgeClass = (status) => {
+    if (status === "final") return "ok";
+    if (status === "in_review") return "warn";
+    return "info";
+  };
   node.innerHTML = items.map((item, index) => {
     const url = item.document_url || "";
     const revisionCount = Array.isArray(item.revisions) ? item.revisions.length : 0;
+    const status = item.status || "draft";
     return `
       <div class="history-card doc-card">
         <div class="history-head">
           <strong>${escapeHtml(item.title || `文档 ${index + 1}`)}</strong>
-          <span class="badge">${escapeHtml(item.status || "draft")}</span>
+          <span class="badge ${badgeClass(status)}">${escapeHtml(status)}</span>
         </div>
         <p>类型：${escapeHtml(item.task_type || "未标记")} · 修改轮次：${revisionCount}</p>
         <div class="history-meta">${escapeHtml(url)}</div>
@@ -388,6 +394,20 @@ async function copyCommand() {
     rememberLocalAction(entry);
     renderResult(entry);
     showToast("命令已复制，并记录到本地历史。");
+  } catch (_error) {
+    showToast("复制失败，请手动复制。");
+  }
+}
+
+async function copyAndLogCommand() {
+  const text = document.getElementById("commandText").value;
+  try {
+    await navigator.clipboard.writeText(text);
+    const entry = createLocalHistoryEntry(text, "sent");
+    entry.summary = "已复制并标记已发送给飞书助手。";
+    rememberLocalAction(entry);
+    renderResult(entry);
+    showToast("已复制并标记为已发送。");
   } catch (_error) {
     showToast("复制失败，请手动复制。");
   }
@@ -738,6 +758,7 @@ function wireActions() {
     });
 
   document.getElementById("btnCopyCommand").addEventListener("click", copyCommand);
+  document.getElementById("btnCopyAndLog").addEventListener("click", copyAndLogCommand);
   document.getElementById("btnSaveLocal").addEventListener("click", saveLocalEntry);
   document.getElementById("btnSubmitCommand").addEventListener("click", submitCommand);
   document.getElementById("btnCloseModal").addEventListener("click", closeModal);
