@@ -742,6 +742,47 @@ function bindQuickButtons() {
     showToast("已定位到数据告警区。");
   });
 
+  document.getElementById("btnDailyBrief").addEventListener("click", () => {
+    openModal(
+      "生成今日作战摘要",
+      [
+        "请生成今日作战摘要。",
+        "覆盖：数据告警、待办池、文档进度、待确认项。",
+        "请给出今天的三件最优先事项和对应下一步动作。",
+      ].join("\n"),
+      "daily_brief",
+      "daily_ops",
+      "analysis"
+    );
+  });
+
+  document.getElementById("btnCompetitorBrief").addEventListener("click", () => {
+    openModal(
+      "生成竞品简报",
+      [
+        "请生成 OTA 竞品简报（美团/携程/飞猪/去哪儿）。",
+        "聚焦节假日/投放/券包/小程序能力等近期动态。",
+        "输出：关键动作、可借鉴点、对我方的建议。",
+      ].join("\n"),
+      "competitor_brief",
+      "daily_ops",
+      "analysis"
+    );
+  });
+
+  document.getElementById("btnOpsChecklist").addEventListener("click", () => {
+    openModal(
+      "刷新待办与告警",
+      [
+        "请刷新今日待办与数据告警清单。",
+        "按优先级排序，并标注需要我确认的事项。",
+      ].join("\n"),
+      "ops_checklist",
+      "daily_ops",
+      "analysis"
+    );
+  });
+
   document.getElementById("btnReload").addEventListener("click", reloadWorkbench);
 }
 
