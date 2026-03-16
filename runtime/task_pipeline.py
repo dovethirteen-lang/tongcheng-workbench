@@ -91,6 +91,8 @@ class TaskPipeline:
             except FeishuDocxError as exc:
                 reply.setdefault("errors", []).append(str(exc))
                 self._write_runtime_log({"level": "error", "stage": "doc_draft", "message": str(exc)})
+        elif parsed.task_type == "daily_ops" and parsed.action == "analysis" and not reply.get("doc_draft"):
+            reply.setdefault("warnings", []).append("日常简报尚未生成飞书草稿，请检查飞书文档权限或配置。")
 
         if create_remote_artifacts and is_revision_request(parsed):
             document_id = extract_document_id(parsed.normalized_text)

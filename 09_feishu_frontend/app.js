@@ -70,8 +70,8 @@ function renderApiStatus() {
   } else {
     node.textContent = "后端状态：静态预览";
   }
-  document.getElementById("btnSubmitCommand").disabled = !apiAvailable;
-  document.getElementById("btnSubmitGenerated").disabled = !apiAvailable;
+  document.getElementById("btnSubmitCommand").disabled = false;
+  document.getElementById("btnSubmitGenerated").disabled = false;
   document.getElementById("modalHint").textContent = apiAvailable
     ? "当前已连接本地主控。你可以直接提交到后端，也可以保存到本地历史后再发给飞书助手。"
     : "当前是静态预览模式。你可以生成命令、保存到本地历史，或复制后发给飞书里的工作助手。";
