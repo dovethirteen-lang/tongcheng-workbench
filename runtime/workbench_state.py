@@ -183,6 +183,8 @@ class WorkbenchState:
                 "lane": result.get("lane", ""),
                 "action": result.get("action", ""),
                 "task_type": result.get("task_type", ""),
+                "doc_url": (result.get("doc_draft") or {}).get("url", ""),
+                "wiki_path": (result.get("wiki_handoff") or {}).get("path", ""),
                 "status": "done" if not result.get("errors") else "error",
             },
         )

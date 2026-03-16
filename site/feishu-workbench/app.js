@@ -369,6 +369,8 @@ function renderActivity(items) {
         <span class="badge ${item.status === "error" ? "danger" : "ok"}">${escapeHtml(item.status || "done")}</span>
       </div>
       <p>${escapeHtml(item.task_type || "")} · ${escapeHtml(item.lane || "")} · ${escapeHtml(item.action || "")}</p>
+      ${item.doc_url ? `<a class="link" href="${escapeHtml(item.doc_url)}" target="_blank" rel="noopener noreferrer">打开飞书草稿</a>` : ""}
+      ${item.wiki_path ? `<p class="history-meta">Wiki 中间稿：${escapeHtml(item.wiki_path)}</p>` : ""}
       <div class="history-meta">${escapeHtml(item.created_at || "")}</div>
     </div>
   `).join("");
