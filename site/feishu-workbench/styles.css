@@ -103,6 +103,28 @@ h2 {
   margin-top: 16px;
 }
 
+.api-tools {
+  margin-top: 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.api-tools .field.inline {
+  grid-template-columns: 120px 1fr;
+  align-items: center;
+}
+
+.api-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.api-actions .ghost {
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+
 .pill {
   padding: 10px 14px;
   border-radius: 999px;
@@ -182,11 +204,11 @@ h2 {
 .composer-output {
   width: 100%;
   padding: 12px 14px;
-  border-radius: 14px;
+  border-radius: 10px;
   border: 1px solid var(--line);
-  background: #f8fbff;
+  background: #f7f8fa;
   color: var(--text);
-  font: 14px/1.5 "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font: 14px/1.5 "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
 }
 
 .field-wide {

@@ -163,3 +163,7 @@ def run_workbench_server(base_dir: Path, host: str = "127.0.0.1", port: int = 43
         server.serve_forever()
     finally:
         server.server_close()
+
+
+if __name__ == "__main__":
+    run_workbench_server(Path(__file__).resolve().parents[1])

@@ -1,11 +1,38 @@
 const DRAFT_STORAGE_KEY = "tc_workbench_composer_draft";
 const HISTORY_STORAGE_KEY = "tc_workbench_local_history";
+const API_BASE_KEY = "tc_workbench_api_base";
 const HISTORY_LIMIT = 20;
 
 let apiAvailable = false;
 let currentIntent = "";
 let currentLane = "general";
 let currentAction = "general";
+let apiBase = "";
+
+function loadApiBase() {
+  const stored = localStorage.getItem(API_BASE_KEY);
+  apiBase = stored ? stored.trim() : "";
+  const input = document.getElementById("apiBaseInput");
+  if (input) {
+    input.value = apiBase;
+  }
+}
+
+function saveApiBase(value) {
+  apiBase = (value || "").trim();
+  if (apiBase) {
+    localStorage.setItem(API_BASE_KEY, apiBase);
+  } else {
+    localStorage.removeItem(API_BASE_KEY);
+  }
+}
+
+function apiUrl(path) {
+  if (apiBase) {
+    return `${apiBase.replace(/\/+$/, "")}${path}`;
+  }
+  return path;
+}
 
 async function loadStaticData() {
   const response = await fetch("./data/workbench.json", { cache: "no-store" });
@@ -16,7 +43,7 @@ async function loadStaticData() {
 }
 
 async function loadApiState() {
-  const response = await fetch("/api/state", { cache: "no-store" });
+  const response = await fetch(apiUrl("/api/state"), { cache: "no-store" });
   if (!response.ok) {
     throw new Error("Failed to load API state");
   }
@@ -25,7 +52,7 @@ async function loadApiState() {
 
 async function detectApi() {
   try {
-    const response = await fetch("/api/health", { cache: "no-store" });
+    const response = await fetch(apiUrl("/api/health"), { cache: "no-store" });
     apiAvailable = response.ok;
   } catch (_error) {
     apiAvailable = false;
@@ -584,7 +611,7 @@ async function reloadWorkbench() {
 }
 
 async function submitTextCommand(text, intent, lane, action) {
-  const response = await fetch("/api/command", {
+  const response = await fetch(apiUrl("/api/command"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -792,6 +819,22 @@ function wireActions() {
   wireHistoryActions();
   wireDocumentActions();
 
+  document.getElementById("btnApplyApiBase").addEventListener("click", async () => {
+    saveApiBase(document.getElementById("apiBaseInput").value);
+    await detectApi();
+    if (apiAvailable) {
+      showToast("本地主控已连接。");
+      const data = await getState();
+      bind(data);
+    } else {
+      showToast("本地主控不可用，请确认地址和服务状态。");
+    }
+  });
+
+  document.getElementById("btnOpenLocal").addEventListener("click", () => {
+    window.open("http://127.0.0.1:4390", "_blank", "noopener");
+  });
+
   document.querySelectorAll("#composerLane, #composerAction, #composerLink, #composerScreenshot, #composerDeadline, #composerNotes")
     .forEach((node) => {
       node.addEventListener("input", saveComposerDraft);
@@ -843,6 +886,7 @@ function bind(data) {
 
 wireActions();
 restoreComposerDraft();
+loadApiBase();
 
 (async () => {
   try {
