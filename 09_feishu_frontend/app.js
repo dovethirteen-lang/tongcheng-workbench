@@ -375,6 +375,67 @@ function renderActivity(items) {
     </div>
   `).join("");
 }
+
+function renderWorkflowInstances(items) {
+  const node = document.getElementById("workflowList");
+  if (!node) {
+    return;
+  }
+  if (!items.length) {
+    node.innerHTML = '<p class="empty">暂无工作流实例。飞书命令进入后，会在这里显示阶段状态。</p>';
+    return;
+  }
+  node.innerHTML = items.map((item, index) => {
+    const doc = item.feishu_doc || {};
+    const source = item.normalized_source || {};
+    const materialCount = Array.isArray(source.materials) ? source.materials.length : 0;
+    return `
+      <div class="history-card">
+        <div class="history-head">
+          <strong>${escapeHtml(item.workflow_id || `workflow-${index + 1}`)}</strong>
+          <span class="badge">${escapeHtml(item.workflow_stage || "intake")}</span>
+        </div>
+        <p>${escapeHtml(laneLabel(item.lane || "general"))} · ${escapeHtml(item.artifact_type || "-")} · 材料 ${materialCount}</p>
+        <p>本地执行：${escapeHtml(item.local_exec_status || "pending")} · 飞书文档：${escapeHtml(item.feishu_doc_status || "none")} · 归档：${escapeHtml(item.archive_status || "idle")}</p>
+        ${item.next_action ? `<p>下一步：${escapeHtml(item.next_action)}</p>` : ""}
+        ${doc.url ? `<a class="link" href="${escapeHtml(doc.url)}" target="_blank" rel="noopener noreferrer">打开飞书文档</a>` : ""}
+        <div class="history-meta">${escapeHtml(item.updated_at || item.created_at || "")}</div>
+      </div>
+    `;
+  }).join("");
+}
+
+function renderLobsterTasks(items) {
+  const node = document.getElementById("lobsterList");
+  if (!node) {
+    return;
+  }
+  if (!items.length) {
+    node.innerHTML = '<p class="empty">暂无已识别的 Lobster 定时任务。</p>';
+    return;
+  }
+  node.innerHTML = items.map((item) => {
+    const outputs = Array.isArray(item.latest_outputs) ? item.latest_outputs : [];
+    const latestOutput = outputs.length ? outputs[0] : "";
+    const notify = Array.isArray(item.notify_platforms) && item.notify_platforms.length
+      ? item.notify_platforms.join(" / ")
+      : "-";
+    return `
+      <div class="history-card">
+        <div class="history-head">
+          <strong>${escapeHtml(item.name || "lobster-task")}</strong>
+          <span class="badge">${escapeHtml(item.status || "scheduled")}</span>
+        </div>
+        <p>${escapeHtml(laneLabel(item.lane || "general"))} · ${escapeHtml(item.artifact_type || "-")}</p>
+        <p>调度：${escapeHtml(item.schedule_type || "cron")} · ${escapeHtml(item.schedule_expression || "-")}</p>
+        <p>通知：${escapeHtml(notify)}</p>
+        ${latestOutput ? `<p>最新产物：${escapeHtml(latestOutput)}</p>` : '<p>最新产物：暂无输出</p>'}
+        <div class="history-meta">${escapeHtml(item.working_directory || item.data_dir || "")}</div>
+      </div>
+    `;
+  }).join("");
+}
+
 function renderDocuments(items) {
   const node = document.getElementById("docList");
   if (!items.length) {
@@ -906,6 +967,8 @@ function wireActions() {
 function bind(data) {
   const localHistory = readLocalHistory();
   const lastResult = data.last_result && Object.keys(data.last_result).length ? data.last_result : localHistory[0] || null;
+  const workflowInstances = data.workflow_instances || [];
+  const lobsterTasks = data.lobster_tasks || [];
 
   document.getElementById("updatedAt").textContent = `更新时间 ${data.updated_at || "-"}`;
   document.getElementById("metrics").innerHTML = [
@@ -914,17 +977,23 @@ function bind(data) {
     metric("打开待办", data.todos.filter((item) => item.status === "open").length),
     metric("数据告警", data.alerts.filter((item) => item.status === "open").length),
     metric("反馈池", data.feedback.length),
+    metric("工作流实例", workflowInstances.length),
+    metric("Lobster任务", lobsterTasks.length),
   ].join("");
 
   document.getElementById("alertCount").textContent = String(data.alerts.length);
   document.getElementById("todoCount").textContent = String(data.todos.length);
   document.getElementById("docCount").textContent = String(data.documents.length);
   document.getElementById("feedbackCount").textContent = String(data.feedback.length);
+  document.getElementById("workflowCount").textContent = String(workflowInstances.length);
+  document.getElementById("lobsterCount").textContent = String(lobsterTasks.length);
 
   document.getElementById("alertList").innerHTML = renderAlerts(data.alerts);
   document.getElementById("todoList").innerHTML = renderTable(data.todos, ["title", "deadline_hint", "status"], "暂无待办");
   renderDocuments(data.documents);
   document.getElementById("commandList").innerHTML = renderCommands(data.commands);
+  renderWorkflowInstances(workflowInstances);
+  renderLobsterTasks(lobsterTasks);
   renderActivity(data.activity || []);
   document.getElementById("capabilityList").innerHTML = renderChips(data.capabilities);
   document.getElementById("releaseList").innerHTML = renderRelease(data.release_plan);

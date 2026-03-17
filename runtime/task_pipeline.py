@@ -60,11 +60,14 @@ class TaskPipeline:
         )
         self.state.record_command(parsed)
         reply = self.command_service.read_reply(reply_path)
+        workflow_instance = self._build_workflow_instance(parsed, reply)
+        self.state.upsert_workflow_instance(workflow_instance)
 
         if create_remote_artifacts and should_create_doc_draft(parsed):
             try:
                 doc_draft = create_doc_draft(self.base_dir, parsed, reply)
                 reply["doc_draft"] = doc_draft
+                reply["feishu_doc"] = doc_draft
                 self.state.record_document(
                     {
                         "document_id": doc_draft["document_id"],
@@ -79,6 +82,8 @@ class TaskPipeline:
                 )
                 if doc_draft.get("warning"):
                     reply.setdefault("warnings", []).append(doc_draft["warning"])
+                workflow_instance = self._build_workflow_instance(parsed, reply)
+                self.state.upsert_workflow_instance(workflow_instance)
                 self._write_runtime_log(
                     {
                         "level": "info",
@@ -100,6 +105,8 @@ class TaskPipeline:
                 try:
                     revision_index = self.state.append_revision(document_id, parsed.normalized_text)
                     reply["revision_request"] = append_revision_request(self.base_dir, parsed, revision_index)
+                    workflow_instance = self._build_workflow_instance(parsed, reply)
+                    self.state.upsert_workflow_instance(workflow_instance)
                     self._write_runtime_log(
                         {
                             "level": "info",
@@ -135,6 +142,8 @@ class TaskPipeline:
             document_id = extract_document_id(parsed.normalized_text)
             if document_id:
                 self.state.mark_document_final(document_id)
+            workflow_instance = self._build_workflow_instance(parsed, reply)
+            self.state.upsert_workflow_instance(workflow_instance)
             self._write_runtime_log(
                 {
                     "level": "info",
@@ -148,6 +157,13 @@ class TaskPipeline:
         if status_page.exists():
             reply["status_page"] = {"path": str(status_page)}
 
+        reply["workflow_instance"] = workflow_instance
+        reply["normalized_source"] = workflow_instance.get("normalized_source")
+        reply["local_artifacts"] = workflow_instance.get("local_artifacts")
+        reply["prototype_package"] = workflow_instance.get("prototype_package")
+        reply["rendered_assets"] = workflow_instance.get("rendered_assets")
+        reply["next_action"] = workflow_instance.get("next_action")
+        reply["needs_human_confirm"] = workflow_instance.get("needs_human_confirm")
         self.command_service.save_reply(reply_path, reply)
         self.state.record_result(
             {
@@ -167,6 +183,14 @@ class TaskPipeline:
                 "todo_queue": reply.get("todo_queue"),
                 "feedback_queue": reply.get("feedback_queue"),
                 "alert_queue": reply.get("alert_queue"),
+                "normalized_source": workflow_instance.get("normalized_source"),
+                "local_artifacts": workflow_instance.get("local_artifacts"),
+                "prototype_package": workflow_instance.get("prototype_package"),
+                "rendered_assets": workflow_instance.get("rendered_assets"),
+                "feishu_doc": reply.get("feishu_doc") or reply.get("doc_draft"),
+                "workflow_instance": workflow_instance,
+                "next_action": workflow_instance.get("next_action"),
+                "needs_human_confirm": workflow_instance.get("needs_human_confirm"),
                 "warnings": reply.get("warnings", []),
                 "errors": reply.get("errors", []),
                 "created_at": datetime.now().isoformat(timespec="seconds"),
@@ -221,6 +245,155 @@ class TaskPipeline:
             source=parsed.source,
             severity=severity,
         )
+
+    def _build_workflow_instance(self, parsed: ParsedCommand, reply: dict[str, Any]) -> dict[str, Any]:
+        entry_type = self._infer_entry_type(parsed)
+        artifact_type = self._infer_artifact_type(parsed)
+        local_artifacts = self._build_local_artifacts(parsed)
+        rendered_assets = self._build_rendered_assets(parsed)
+        prototype_package = self._build_prototype_package(parsed, local_artifacts)
+        feishu_doc = reply.get("feishu_doc") or reply.get("doc_draft")
+
+        workflow_stage = "intake"
+        local_exec_status = "pending"
+        feishu_doc_status = "none"
+        archive_status = "idle"
+        needs_human_confirm = False
+
+        if local_artifacts or rendered_assets or prototype_package:
+            workflow_stage = "local_processing"
+            local_exec_status = "done"
+
+        if feishu_doc:
+            workflow_stage = "feishu_review"
+            feishu_doc_status = "draft"
+            needs_human_confirm = True
+
+        if reply.get("revision_request"):
+            workflow_stage = "feishu_review"
+            feishu_doc_status = "revising"
+            needs_human_confirm = True
+
+        if reply.get("notion_archive"):
+            workflow_stage = "archived"
+            archive_status = "archived"
+            feishu_doc_status = "finalized" if feishu_doc else feishu_doc_status
+            needs_human_confirm = False
+        elif parsed.action == "finalize":
+            workflow_stage = "finalized"
+            archive_status = "ready"
+            feishu_doc_status = "finalized" if feishu_doc else feishu_doc_status
+
+        return {
+            "workflow_id": parsed.command_id,
+            "entry_type": entry_type,
+            "lane": parsed.lane,
+            "task_type": parsed.task_type,
+            "artifact_type": artifact_type,
+            "workflow_stage": workflow_stage,
+            "feishu_doc_status": feishu_doc_status,
+            "local_exec_status": local_exec_status,
+            "archive_status": archive_status,
+            "normalized_source": {
+                "source": parsed.source,
+                "materials": parsed.inputs,
+                "deadline_hint": parsed.deadline_hint,
+            },
+            "local_artifacts": local_artifacts,
+            "prototype_package": prototype_package,
+            "rendered_assets": rendered_assets,
+            "feishu_doc": feishu_doc,
+            "next_action": self._infer_next_action(workflow_stage, artifact_type),
+            "needs_human_confirm": needs_human_confirm,
+            "created_at": parsed.created_at,
+            "updated_at": datetime.now().isoformat(timespec="seconds"),
+        }
+
+    def _infer_entry_type(self, parsed: ParsedCommand) -> str:
+        has_link = any(item.startswith("http://") or item.startswith("https://") for item in parsed.inputs)
+        has_local = any(":\\" in item for item in parsed.inputs)
+        has_image = any(item.lower().endswith((".png", ".jpg", ".jpeg", ".webp", ".gif")) for item in parsed.inputs)
+
+        types: list[str] = []
+        if parsed.source.startswith("feishu"):
+            types.append("bot_command")
+        if has_link:
+            types.append("link")
+        if has_local:
+            types.append("local_path")
+        if has_image:
+            types.append("screenshot")
+
+        if len(types) > 1:
+            return "mixed"
+        if types:
+            return types[0]
+        return "bot_command"
+
+    def _infer_artifact_type(self, parsed: ParsedCommand) -> str:
+        mapping = {
+            "requirement_card": "requirement_card",
+            "prd_draft": "prd",
+            "analysis": "analysis",
+            "todo": "todo",
+            "feedback": "todo",
+            "alert": "alert",
+            "finalize": "prd",
+        }
+        artifact_type = mapping.get(parsed.action, "analysis" if parsed.task_type == "daily_ops" else "requirement_card")
+        if self._is_prototype_request(parsed):
+            return "prototype_package"
+        return artifact_type
+
+    def _build_local_artifacts(self, parsed: ParsedCommand) -> list[dict[str, Any]]:
+        artifacts: list[dict[str, Any]] = []
+        for item in parsed.inputs:
+            if ":\\" in item:
+                artifacts.append({"kind": "local_path", "path": item})
+            elif item.startswith("http://") or item.startswith("https://"):
+                artifacts.append({"kind": "remote_link", "path": item})
+        return artifacts
+
+    def _build_rendered_assets(self, parsed: ParsedCommand) -> list[dict[str, Any]]:
+        return [
+            {"kind": "image", "path": item}
+            for item in parsed.inputs
+            if item.lower().endswith((".png", ".jpg", ".jpeg", ".webp", ".gif"))
+        ]
+
+    def _build_prototype_package(self, parsed: ParsedCommand, local_artifacts: list[dict[str, Any]]) -> dict[str, Any] | None:
+        if not self._is_prototype_request(parsed):
+            return None
+
+        preferred_path = ""
+        for item in local_artifacts:
+            path = str(item.get("path", ""))
+            if path.lower().endswith((".html", ".htm", ".tsx", ".jsx", ".js")):
+                preferred_path = path
+                break
+
+        return {
+            "name": f"{parsed.command_id}-prototype",
+            "status": "ready_for_local_exec",
+            "path": preferred_path or str(Path(r"D:\Project\docs") / "prototype_packages" / parsed.command_id),
+        }
+
+    def _is_prototype_request(self, parsed: ParsedCommand) -> bool:
+        text = parsed.normalized_text.lower()
+        return any(token in text for token in ["prototype", "react", "html", "原型", "线框", "htm to design"])
+
+    def _infer_next_action(self, workflow_stage: str, artifact_type: str) -> str:
+        if workflow_stage == "local_processing":
+            return "wait_for_feishu_review"
+        if workflow_stage == "feishu_review":
+            return "wait_for_human_comments"
+        if workflow_stage == "finalized":
+            return "ready_for_archive"
+        if workflow_stage == "archived":
+            return "archived"
+        if artifact_type == "todo":
+            return "wait_for_follow_up"
+        return "prepare_local_execution"
 
     def _write_runtime_log(self, payload: dict[str, Any]) -> None:
         path = self.runtime_root / "events.log"

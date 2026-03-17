@@ -10,6 +10,7 @@ if str(BASE_DIR) not in sys.path:
     sys.path.insert(0, str(BASE_DIR))
 
 from runtime.workbench_state import WorkbenchState
+from runtime.lobster_bridge import discover_lobster_tasks
 
 
 def main() -> None:
@@ -28,6 +29,8 @@ def main() -> None:
         "feedback": state.get("feedback", [])[:8],
         "alerts": state.get("alerts", [])[:8],
         "last_result": state.get("last_result", {}),
+        "workflow_instances": state.get("workflow_instances", [])[:12],
+        "lobster_tasks": discover_lobster_tasks()[:12],
         "capabilities": state.get("capabilities", {}),
         "release_plan": state.get("release_plan", {}),
         "notion_config": {

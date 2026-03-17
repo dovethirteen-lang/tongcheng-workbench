@@ -25,6 +25,7 @@ class WorkbenchState:
         payload.setdefault("alerts", [])
         payload.setdefault("last_result", {})
         payload.setdefault("activity", [])
+        payload.setdefault("workflow_instances", [])
         payload["capabilities"] = defaults["capabilities"]
         payload["release_plan"] = defaults["release_plan"]
         self._write(payload)
@@ -39,6 +40,7 @@ class WorkbenchState:
             "alerts": [],
             "last_result": {},
             "activity": [],
+            "workflow_instances": [],
             "capabilities": {
                 "feishu_entry": "ready",
                 "feishu_doc_draft": "ready",
@@ -47,6 +49,7 @@ class WorkbenchState:
                 "daily_ops_panel": "planned",
                 "data_alerts": "basic-ready",
                 "enterprise_wecom_entry": "deferred",
+                "lobster_scheduler": "integrated-view",
             },
             "release_plan": {
                 "1.0": "飞书主入口 + 飞书草稿 + 定稿后归档",
@@ -189,6 +192,17 @@ class WorkbenchState:
             },
         )
         payload["activity"] = activity[:30]
+        self._write(payload)
+
+    def upsert_workflow_instance(self, instance: dict[str, Any]) -> None:
+        payload = self._read()
+        items = [
+            item
+            for item in payload.get("workflow_instances", [])
+            if item.get("workflow_id") != instance.get("workflow_id")
+        ]
+        items.insert(0, instance)
+        payload["workflow_instances"] = items[:50]
         self._write(payload)
 
     def snapshot(self) -> dict[str, Any]:

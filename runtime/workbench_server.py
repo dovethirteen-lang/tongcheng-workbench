@@ -6,6 +6,7 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlparse
 
+from .lobster_bridge import discover_lobster_tasks
 from .task_pipeline import TaskPipeline
 from .workbench_state import WorkbenchState
 
@@ -38,6 +39,9 @@ class WorkbenchRequestHandler(SimpleHTTPRequestHandler):
             return
         if parsed.path == "/api/state":
             self._send_json(self._build_state_payload())
+            return
+        if parsed.path == "/api/lobster/tasks":
+            self._send_json({"tasks": discover_lobster_tasks()})
             return
         if parsed.path == "/api/templates":
             self._send_json(
@@ -147,6 +151,8 @@ class WorkbenchRequestHandler(SimpleHTTPRequestHandler):
             "document_channel": feishu_config.get("document_channel", ""),
             "document_strategy": feishu_config.get("document_strategy", {}),
         }
+        state["workflow_instances"] = state.get("workflow_instances", [])[:12]
+        state["lobster_tasks"] = discover_lobster_tasks()[:12]
         return state
 
 
