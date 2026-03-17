@@ -1,6 +1,41 @@
 {
-  "updated_at": "2026-03-17T19:55:59",
+  "updated_at": "2026-03-17T22:06:33",
   "commands": [
+    {
+      "command_id": "cmd-f311a967",
+      "task_type": "general",
+      "source": "feishu_openclaw",
+      "normalized_text": "??? Lobster ????????????????????",
+      "created_at": "2026-03-17T22:02:34"
+    },
+    {
+      "command_id": "cmd-28ed4f30",
+      "task_type": "general",
+      "source": "feishu_openclaw",
+      "normalized_text": "??? Lobster ????????????????????",
+      "created_at": "2026-03-17T22:01:18"
+    },
+    {
+      "command_id": "cmd-7d025d22",
+      "task_type": "wechat_growth",
+      "source": "workbench_frontend",
+      "normalized_text": "????PRD??prototype??????https://www.notion.so/prd-xx???HTML??????Figma????",
+      "created_at": "2026-03-17T22:00:30"
+    },
+    {
+      "command_id": "cmd-7c872319",
+      "task_type": "general",
+      "source": "feishu_openclaw",
+      "normalized_text": "??? Lobster ????????????????????",
+      "created_at": "2026-03-17T22:00:30"
+    },
+    {
+      "command_id": "cmd-09125f07",
+      "task_type": "ads_experiment",
+      "source": "feishu_openclaw",
+      "normalized_text": "????????????????????????A????????https://www.notion.so/test-exp?sql???D:\\Project\\sql\\hotel_exp.sql?????????,ROI,????????????17:00??",
+      "created_at": "2026-03-17T22:00:30"
+    },
     {
       "command_id": "cmd-a9632bb6",
       "task_type": "daily_ops",
@@ -21,41 +56,6 @@
       "source": "workbench_frontend",
       "normalized_text": "这是一个每日作战任务。资料位置：D:\\Project\\docs\\meeting-notes.md`n聊天截图：D:\\Project\\docs\\wecom-chat-0316.png`n请结合聊天截图一起理解上下文，不要只看文字摘要。`n请登记一条新的待办。`n写清事项、阻塞点、回传结果。",
       "created_at": "2026-03-16T01:18:04"
-    },
-    {
-      "command_id": "cmd-f09873e2",
-      "task_type": "daily_ops",
-      "source": "workbench_frontend",
-      "normalized_text": "这是一个每日作战任务。资料位置：D:\\Project\\data\\ads\\exp.csv`n请登记一条新的待办。`n写清事项、阻塞点、回传结果。",
-      "created_at": "2026-03-16T00:39:04"
-    },
-    {
-      "command_id": "cmd-356109d1",
-      "task_type": "ads_experiment",
-      "source": "workbench_frontend",
-      "normalized_text": "这是一个广告专项任务。资料位置：https://www.notion.so/test`n请记录一条数据告警。`n写清异常指标、波动情况、初步判断、下一步排查动作。",
-      "created_at": "2026-03-16T00:39:04"
-    },
-    {
-      "command_id": "cmd-f3ee3d33",
-      "task_type": "general",
-      "source": "workbench_frontend",
-      "normalized_text": "????????????????????????????????????",
-      "created_at": "2026-03-15T23:40:46"
-    },
-    {
-      "command_id": "cmd-d71e4191",
-      "task_type": "general",
-      "source": "workbench_frontend",
-      "normalized_text": "?????????????????????????????????",
-      "created_at": "2026-03-15T23:40:45"
-    },
-    {
-      "command_id": "cmd-c0d38afe",
-      "task_type": "general",
-      "source": "workbench_frontend",
-      "normalized_text": "????????????????????????????????????",
-      "created_at": "2026-03-15T23:40:45"
     }
   ],
   "documents": [],
@@ -124,35 +124,323 @@
     }
   ],
   "last_result": {
-    "command_id": "cmd-a9632bb6",
-    "task_type": "daily_ops",
-    "lane": "daily_ops",
-    "action": "todo",
-    "summary": "已识别为 daily_ops 任务，主控层将分发给 每日作战助手 Agent。 预期产出包括：待办记录、deadline 提醒、跟进项。 当前截止要求：未明确截止时间。",
+    "command_id": "cmd-f311a967",
+    "task_type": "general",
+    "lane": "general",
+    "action": "general",
+    "summary": "已识别为 general 任务，主控层将分发给 Orchestrator / 主控 PM。 预期产出包括：结构化任务说明、下一步动作。 当前截止要求：未明确截止时间。",
+    "materials": [],
     "doc_draft": null,
     "revision_request": null,
     "notion_archive": null,
     "wiki_handoff": null,
-    "todo_item": {
-      "id": "todo-20260316012839",
-      "title": "这是一个每日作战任务。资料位置：D:\\Project\\docs\\meeting-notes.md`n聊天截图：D:\\Project\\docs\\wecom-cha",
-      "source": "workbench_frontend",
-      "deadline_hint": "",
-      "status": "open",
-      "created_at": "2026-03-16T01:28:39"
-    },
+    "todo_item": null,
     "feedback_item": null,
     "alert_item": null,
-    "todo_queue": {
-      "path": "D:\\Project\\runtime\\notion_workspace_queue\\todo\\todo-20260316012839.json"
-    },
+    "todo_queue": null,
     "feedback_queue": null,
     "alert_queue": null,
+    "normalized_source": {
+      "source": "feishu_openclaw",
+      "materials": [],
+      "deadline_hint": null
+    },
+    "local_artifacts": [],
+    "prototype_package": null,
+    "prototype_task": null,
+    "rendered_assets": [],
+    "experiment_payload": null,
+    "experiment_result": null,
+    "executor": "lobster",
+    "priority_quadrant": "Q2_important_not_urgent",
+    "run_status": "success",
+    "trigger_source": "feishu_openclaw",
+    "lobster_task_name": "",
+    "latest_output": "",
+    "error_summary": "",
+    "feishu_doc": null,
+    "workflow_instance": {
+      "workflow_id": "cmd-f311a967",
+      "entry_type": "bot_command",
+      "lane": "general",
+      "task_type": "general",
+      "artifact_type": "requirement_card",
+      "executor": "lobster",
+      "priority_quadrant": "Q2_important_not_urgent",
+      "workflow_stage": "completed",
+      "feishu_doc_status": "none",
+      "local_exec_status": "running",
+      "archive_status": "idle",
+      "trigger_source": "feishu_openclaw",
+      "lobster_task_name": "",
+      "run_status": "success",
+      "latest_output": "",
+      "error_summary": "",
+      "normalized_source": {
+        "source": "feishu_openclaw",
+        "materials": [],
+        "deadline_hint": null
+      },
+      "local_artifacts": [],
+      "prototype_package": null,
+      "prototype_spec_path": "D:\\Docspace\\Desktop\\Product prototype html(1)\\Product prototype html\\【规范】HTML原型文件出图要求.md",
+      "h2d_reference_path": "D:\\CodeX\\Database\\Product prototype html(1)\\_D_Docspace_Desktop_Product_20prototype_20html_1_Product_20prototype_20html_buchong2_1912w_default.h2d",
+      "prototype_task": null,
+      "rendered_assets": [],
+      "experiment_payload": null,
+      "experiment_result": null,
+      "feishu_doc": null,
+      "next_action": "ready_for_review",
+      "needs_human_confirm": false,
+      "created_at": "2026-03-17T22:02:34",
+      "updated_at": "2026-03-17T22:02:34"
+    },
+    "next_action": "ready_for_review",
+    "needs_human_confirm": false,
     "warnings": [],
     "errors": [],
-    "created_at": "2026-03-16T01:28:39"
+    "created_at": "2026-03-17T22:02:34"
   },
-  "workflow_instances": [],
+  "workflow_instances": [
+    {
+      "workflow_id": "cmd-f311a967",
+      "entry_type": "bot_command",
+      "lane": "general",
+      "task_type": "general",
+      "artifact_type": "requirement_card",
+      "executor": "lobster",
+      "priority_quadrant": "Q2_important_not_urgent",
+      "workflow_stage": "completed",
+      "feishu_doc_status": "none",
+      "local_exec_status": "running",
+      "archive_status": "idle",
+      "trigger_source": "feishu_openclaw",
+      "lobster_task_name": "",
+      "run_status": "success",
+      "latest_output": "",
+      "error_summary": "",
+      "normalized_source": {
+        "source": "feishu_openclaw",
+        "materials": [],
+        "deadline_hint": null
+      },
+      "local_artifacts": [],
+      "prototype_package": null,
+      "prototype_spec_path": "D:\\Docspace\\Desktop\\Product prototype html(1)\\Product prototype html\\【规范】HTML原型文件出图要求.md",
+      "h2d_reference_path": "D:\\CodeX\\Database\\Product prototype html(1)\\_D_Docspace_Desktop_Product_20prototype_20html_1_Product_20prototype_20html_buchong2_1912w_default.h2d",
+      "prototype_task": null,
+      "rendered_assets": [],
+      "experiment_payload": null,
+      "experiment_result": null,
+      "feishu_doc": null,
+      "next_action": "ready_for_review",
+      "needs_human_confirm": false,
+      "created_at": "2026-03-17T22:02:34",
+      "updated_at": "2026-03-17T22:02:34"
+    },
+    {
+      "workflow_id": "cmd-28ed4f30",
+      "entry_type": "bot_command",
+      "lane": "general",
+      "task_type": "general",
+      "artifact_type": "requirement_card",
+      "executor": "lobster",
+      "priority_quadrant": "Q4_not_important_not_urgent",
+      "workflow_stage": "completed",
+      "feishu_doc_status": "none",
+      "local_exec_status": "running",
+      "archive_status": "idle",
+      "trigger_source": "feishu_openclaw",
+      "lobster_task_name": "",
+      "run_status": "success",
+      "latest_output": "",
+      "error_summary": "",
+      "normalized_source": {
+        "source": "feishu_openclaw",
+        "materials": [],
+        "deadline_hint": null
+      },
+      "local_artifacts": [],
+      "prototype_package": null,
+      "prototype_spec_path": "D:\\Docspace\\Desktop\\Product prototype html(1)\\Product prototype html\\【规范】HTML原型文件出图要求.md",
+      "h2d_reference_path": "D:\\CodeX\\Database\\Product prototype html(1)\\_D_Docspace_Desktop_Product_20prototype_20html_1_Product_20prototype_20html_buchong2_1912w_default.h2d",
+      "prototype_task": null,
+      "rendered_assets": [],
+      "experiment_payload": null,
+      "experiment_result": null,
+      "feishu_doc": null,
+      "next_action": "ready_for_review",
+      "needs_human_confirm": false,
+      "created_at": "2026-03-17T22:01:18",
+      "updated_at": "2026-03-17T22:01:18"
+    },
+    {
+      "workflow_id": "cmd-7d025d22",
+      "entry_type": "link",
+      "lane": "wechat_growth",
+      "task_type": "wechat_growth",
+      "artifact_type": "prototype_package",
+      "executor": "codex",
+      "priority_quadrant": "Q2_important_not_urgent",
+      "workflow_stage": "completed",
+      "feishu_doc_status": "none",
+      "local_exec_status": "done",
+      "archive_status": "idle",
+      "trigger_source": "workbench_frontend",
+      "lobster_task_name": "",
+      "run_status": "none",
+      "latest_output": "",
+      "error_summary": "",
+      "normalized_source": {
+        "source": "workbench_frontend",
+        "materials": [
+          "https://www.notion.so/prd-xx???HTML??????Figma????",
+          "notion"
+        ],
+        "deadline_hint": null
+      },
+      "local_artifacts": [
+        {
+          "kind": "remote_link",
+          "path": "https://www.notion.so/prd-xx???HTML??????Figma????"
+        }
+      ],
+      "prototype_package": {
+        "name": "cmd-7d025d22-prototype",
+        "status": "ready_for_local_exec",
+        "path": "D:\\Project\\docs\\prototype_packages\\cmd-7d025d22"
+      },
+      "prototype_spec_path": "D:\\Docspace\\Desktop\\Product prototype html(1)\\Product prototype html\\【规范】HTML原型文件出图要求.md",
+      "h2d_reference_path": "D:\\CodeX\\Database\\Product prototype html(1)\\_D_Docspace_Desktop_Product_20prototype_20html_1_Product_20prototype_20html_buchong2_1912w_default.h2d",
+      "prototype_task": {
+        "source_link": "https://www.notion.so/prd-xx???HTML??????Figma????",
+        "prompt": "????PRD??prototype??????https://www.notion.so/prd-xx???HTML??????Figma????",
+        "prototype_path": "D:\\Project\\docs\\prototype_packages\\cmd-7d025d22",
+        "preview_status": "ready",
+        "design_round": "第1轮",
+        "needs_figma_refine": "yes",
+        "h2d_status": "deferred",
+        "h2d_path": "D:\\CodeX\\Database\\Product prototype html(1)\\_D_Docspace_Desktop_Product_20prototype_20html_1_Product_20prototype_20html_buchong2_1912w_default.h2d",
+        "figma_import_status": "pending"
+      },
+      "rendered_assets": [],
+      "experiment_payload": null,
+      "experiment_result": null,
+      "feishu_doc": null,
+      "next_action": "ready_for_review",
+      "needs_human_confirm": false,
+      "created_at": "2026-03-17T22:00:30",
+      "updated_at": "2026-03-17T22:00:30"
+    },
+    {
+      "workflow_id": "cmd-7c872319",
+      "entry_type": "bot_command",
+      "lane": "general",
+      "task_type": "general",
+      "artifact_type": "requirement_card",
+      "executor": "lobster",
+      "priority_quadrant": "Q4_not_important_not_urgent",
+      "workflow_stage": "completed",
+      "feishu_doc_status": "none",
+      "local_exec_status": "running",
+      "archive_status": "idle",
+      "trigger_source": "feishu_openclaw",
+      "lobster_task_name": "",
+      "run_status": "success",
+      "latest_output": "",
+      "error_summary": "",
+      "normalized_source": {
+        "source": "feishu_openclaw",
+        "materials": [],
+        "deadline_hint": null
+      },
+      "local_artifacts": [],
+      "prototype_package": null,
+      "prototype_spec_path": "D:\\Docspace\\Desktop\\Product prototype html(1)\\Product prototype html\\【规范】HTML原型文件出图要求.md",
+      "h2d_reference_path": "D:\\CodeX\\Database\\Product prototype html(1)\\_D_Docspace_Desktop_Product_20prototype_20html_1_Product_20prototype_20html_buchong2_1912w_default.h2d",
+      "prototype_task": null,
+      "rendered_assets": [],
+      "experiment_payload": null,
+      "experiment_result": null,
+      "feishu_doc": null,
+      "next_action": "ready_for_review",
+      "needs_human_confirm": false,
+      "created_at": "2026-03-17T22:00:30",
+      "updated_at": "2026-03-17T22:00:30"
+    },
+    {
+      "workflow_id": "cmd-09125f07",
+      "entry_type": "mixed",
+      "lane": "ads_experiment",
+      "task_type": "ads_experiment",
+      "artifact_type": "requirement_card",
+      "executor": "codex",
+      "priority_quadrant": "Q2_important_not_urgent",
+      "workflow_stage": "completed",
+      "feishu_doc_status": "none",
+      "local_exec_status": "done",
+      "archive_status": "idle",
+      "trigger_source": "feishu_openclaw",
+      "lobster_task_name": "",
+      "run_status": "none",
+      "latest_output": "",
+      "error_summary": "",
+      "normalized_source": {
+        "source": "feishu_openclaw",
+        "materials": [
+          "https://www.notion.so/test-exp?sql???D:\\Project\\sql\\hotel_exp.sql?????????,ROI,????????????17:00??",
+          "D:\\Project\\sql\\hotel_exp.sql?????????,ROI,????????????17:00??",
+          "notion"
+        ],
+        "deadline_hint": null
+      },
+      "local_artifacts": [
+        {
+          "kind": "local_path",
+          "path": "https://www.notion.so/test-exp?sql???D:\\Project\\sql\\hotel_exp.sql?????????,ROI,????????????17:00??"
+        },
+        {
+          "kind": "local_path",
+          "path": "D:\\Project\\sql\\hotel_exp.sql?????????,ROI,????????????17:00??"
+        }
+      ],
+      "prototype_package": null,
+      "prototype_spec_path": "D:\\Docspace\\Desktop\\Product prototype html(1)\\Product prototype html\\【规范】HTML原型文件出图要求.md",
+      "h2d_reference_path": "D:\\CodeX\\Database\\Product prototype html(1)\\_D_Docspace_Desktop_Product_20prototype_20html_1_Product_20prototype_20html_buchong2_1912w_default.h2d",
+      "prototype_task": null,
+      "rendered_assets": [],
+      "experiment_payload": {
+        "experiment_name": "????????????????????????A????????htt",
+        "experiment_spec_link": "https://www.notion.so/test-exp?sql???D:\\Project\\sql\\hotel_exp.sql?????????,ROI,????????????17:00??",
+        "sql_reference": "",
+        "metric_definition": "",
+        "deadline": "",
+        "result_file_path": ""
+      },
+      "experiment_result": {
+        "analysis_summary": "已识别为 ads_experiment 任务，主控层将分发给 实验设计 Agent、数据工程师 Agent、商业分析师 Agent。 预期产出包括：实验方案、SQL 请求、结果分析、预算建议、行动项、Notion 落库建议、页面结构、关联关系、发布中间稿建议。 当前截止要求：未明确截止时间。",
+        "key_metrics": [],
+        "confidence_note": "当前为1.0自动分析结果，请在定稿前确认样本量、口径一致性与异常点解释。",
+        "next_actions": [
+          "主控层先读取资料并生成结构化任务摘要。",
+          "根据任务类型分发给：实验设计 Agent, 数据工程师 Agent, 商业分析师 Agent。",
+          "预期产出：实验方案, SQL 请求, 结果分析, 预算建议, 行动项, Notion 落库建议, 页面结构, 关联关系, 发布中间稿建议。",
+          "如涉及本地数据目录，先校验文件结构和字段完整性。"
+        ],
+        "pending_confirmations": [
+          "补充 SQL 参考或可执行脚本路径",
+          "补充实验指标口径定义",
+          "补充结果文件路径（CSV/XLSX）",
+          "补充回收截止时间"
+        ]
+      },
+      "feishu_doc": null,
+      "next_action": "ready_for_review",
+      "needs_human_confirm": false,
+      "created_at": "2026-03-17T22:00:30",
+      "updated_at": "2026-03-17T22:00:30"
+    }
+  ],
   "lobster_tasks": [
     {
       "name": "同程广告承接侧 T+0 周报",
@@ -168,7 +456,10 @@
       "lane": "daily_ops",
       "artifact_type": "analysis",
       "executor": "lobster",
-      "status": "scheduled"
+      "status": "scheduled",
+      "latest_output": "",
+      "error_summary": "",
+      "trigger_source": ""
     },
     {
       "name": "同程日报-数据取数",
@@ -186,7 +477,10 @@
       "lane": "daily_ops",
       "artifact_type": "analysis",
       "executor": "lobster",
-      "status": "scheduled"
+      "status": "scheduled",
+      "latest_output": "",
+      "error_summary": "",
+      "trigger_source": ""
     },
     {
       "name": "同程日报-数据清洗",
@@ -204,7 +498,10 @@
       "lane": "daily_ops",
       "artifact_type": "analysis",
       "executor": "lobster",
-      "status": "scheduled"
+      "status": "scheduled",
+      "latest_output": "",
+      "error_summary": "",
+      "trigger_source": ""
     },
     {
       "name": "同程运营日报",
@@ -220,7 +517,10 @@
       "lane": "daily_ops",
       "artifact_type": "analysis",
       "executor": "lobster",
-      "status": "scheduled"
+      "status": "scheduled",
+      "latest_output": "",
+      "error_summary": "",
+      "trigger_source": ""
     }
   ],
   "capabilities": {
@@ -231,13 +531,21 @@
     "daily_ops_panel": "planned",
     "data_alerts": "basic-ready",
     "enterprise_wecom_entry": "deferred",
-    "lobster_scheduler": "integrated-view"
+    "lobster_scheduler": "integrated-view",
+    "openclaw_trigger": "ready",
+    "executor_routing": "mvp-ready",
+    "prototype_fast_path": "html-preview-ready"
   },
   "release_plan": {
-    "1.0": "飞书主入口 + 飞书草稿 + 定稿后归档",
-    "1.1": "多轮修改闭环与定稿指令",
+    "1.0": "酒店实验回收 + OpenClaw调度Lobster + 原型HTML快路径",
+    "1.1": "多轮修改闭环与失败重试优化",
     "1.2": "待办、版本、能力现状与助手状态视图",
     "1.3": "反馈收集与周末迭代输入链路"
+  },
+  "prototype_config": {
+    "prototype_spec_path": "D:\\Docspace\\Desktop\\Product prototype html(1)\\Product prototype html\\【规范】HTML原型文件出图要求.md",
+    "h2d_reference_path": "D:\\CodeX\\Database\\Product prototype html(1)\\_D_Docspace_Desktop_Product_20prototype_20html_1_Product_20prototype_20html_buchong2_1912w_default.h2d",
+    "figma_import": "deferred_in_1_0"
   },
   "notion_config": {
     "workspace_name": "CodeX 工作空间",

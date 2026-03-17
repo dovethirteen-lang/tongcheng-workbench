@@ -265,6 +265,15 @@ function buildComposerCommand() {
     parts.push(screenshotLine);
     parts.push("请结合聊天截图一起理解上下文，不要只看文字摘要。");
   }
+  if (draft.lane === "ads_experiment") {
+    parts.push(`实验方案链接：${draft.link || "待补充"}`);
+    parts.push(`指标口径：${draft.notes || "待补充"}`);
+    parts.push(`截止时间：${draft.deadline || "待补充"}`);
+    parts.push("请按实验回收结构输出：analysis_summary、key_metrics、confidence_note、next_actions、pending_confirmations。");
+  }
+  if (draft.action === "analysis" && (draft.notes || "").toLowerCase().includes("prototype")) {
+    parts.push("原型链路默认走 HTML -> 本地浏览器预览，Figma 导入保持 deferred。");
+  }
   parts.push(...(actionTemplates[draft.action] || actionTemplates.requirement_card));
   if (deadlineLine) {
     parts.push(deadlineLine);
@@ -278,6 +287,7 @@ function buildComposerCommand() {
 function renderConfig(data) {
   const notion = data.notion_config || {};
   const feishu = data.feishu_config || {};
+  const prototype = data.prototype_config || {};
   const route = notion.routing_map || {};
   const cards = [];
 
@@ -329,6 +339,24 @@ function renderConfig(data) {
       <div class="release-card">
         <strong>业务路由</strong>
         <span>微信 -> ${escapeHtml(route.wechat_growth?.database || "-")}；广告 -> ${escapeHtml(route.ads_experiment?.database || "-")}；多平台 -> ${escapeHtml(route.platform_integration?.database || "-")}</span>
+      </div>
+    `);
+  }
+
+  if (prototype.prototype_spec_path) {
+    cards.push(`
+      <div class="release-card">
+        <strong>原型规范</strong>
+        <span>${escapeHtml(prototype.prototype_spec_path)}</span>
+      </div>
+    `);
+  }
+
+  if (prototype.h2d_reference_path) {
+    cards.push(`
+      <div class="release-card">
+        <strong>h2d 参考</strong>
+        <span>${escapeHtml(prototype.h2d_reference_path)} · ${escapeHtml(prototype.figma_import || "deferred_in_1_0")}</span>
       </div>
     `);
   }
@@ -388,6 +416,8 @@ function renderWorkflowInstances(items) {
   node.innerHTML = items.map((item, index) => {
     const doc = item.feishu_doc || {};
     const source = item.normalized_source || {};
+    const experiment = item.experiment_result || {};
+    const prototype = item.prototype_task || {};
     const materialCount = Array.isArray(source.materials) ? source.materials.length : 0;
     return `
       <div class="history-card">
@@ -396,8 +426,18 @@ function renderWorkflowInstances(items) {
           <span class="badge">${escapeHtml(item.workflow_stage || "intake")}</span>
         </div>
         <p>${escapeHtml(laneLabel(item.lane || "general"))} · ${escapeHtml(item.artifact_type || "-")} · 材料 ${materialCount}</p>
-        <p>本地执行：${escapeHtml(item.local_exec_status || "pending")} · 飞书文档：${escapeHtml(item.feishu_doc_status || "none")} · 归档：${escapeHtml(item.archive_status || "idle")}</p>
+        <p>执行器：${escapeHtml(item.executor || "-")} · 优先级：${escapeHtml(item.priority_quadrant || "-")}</p>
+        <p>执行状态：${escapeHtml(item.local_exec_status || "pending")} · 运行态：${escapeHtml(item.run_status || "none")} · 归档：${escapeHtml(item.archive_status || "idle")}</p>
+        ${item.error_summary ? `<p class="error-text">失败摘要：${escapeHtml(item.error_summary)}</p>` : ""}
+        ${item.latest_output ? `<p>最近输出：${escapeHtml(item.latest_output)}</p>` : ""}
+        ${item.lobster_task_name ? `<p>Lobster任务：${escapeHtml(item.lobster_task_name)}</p>` : ""}
         ${item.next_action ? `<p>下一步：${escapeHtml(item.next_action)}</p>` : ""}
+        ${Array.isArray(experiment.key_metrics) && experiment.key_metrics.length ? `<p>实验关键指标：${escapeHtml(experiment.key_metrics.join(" / "))}</p>` : ""}
+        ${experiment.confidence_note ? `<p>置信提示：${escapeHtml(experiment.confidence_note)}</p>` : ""}
+        ${prototype.prototype_path ? `<p>原型路径：${escapeHtml(prototype.prototype_path)}</p>` : ""}
+        ${prototype.preview_status ? `<p>预览状态：${escapeHtml(prototype.preview_status)} · Figma精修：${escapeHtml(prototype.needs_figma_refine || "no")}</p>` : ""}
+        ${prototype.figma_import_status ? `<p>Figma导入状态：${escapeHtml(prototype.figma_import_status)} · h2d：${escapeHtml(prototype.h2d_status || "deferred")}</p>` : ""}
+        ${item.needs_human_confirm ? `<p class="warn-text">当前等待人工确认</p>` : ""}
         ${doc.url ? `<a class="link" href="${escapeHtml(doc.url)}" target="_blank" rel="noopener noreferrer">打开飞书文档</a>` : ""}
         <div class="history-meta">${escapeHtml(item.updated_at || item.created_at || "")}</div>
       </div>
@@ -416,7 +456,7 @@ function renderLobsterTasks(items) {
   }
   node.innerHTML = items.map((item) => {
     const outputs = Array.isArray(item.latest_outputs) ? item.latest_outputs : [];
-    const latestOutput = outputs.length ? outputs[0] : "";
+    const latestOutput = item.latest_output || (outputs.length ? outputs[0] : "");
     const notify = Array.isArray(item.notify_platforms) && item.notify_platforms.length
       ? item.notify_platforms.join(" / ")
       : "-";
@@ -429,6 +469,8 @@ function renderLobsterTasks(items) {
         <p>${escapeHtml(laneLabel(item.lane || "general"))} · ${escapeHtml(item.artifact_type || "-")}</p>
         <p>调度：${escapeHtml(item.schedule_type || "cron")} · ${escapeHtml(item.schedule_expression || "-")}</p>
         <p>通知：${escapeHtml(notify)}</p>
+        ${item.trigger_source ? `<p>触发来源：${escapeHtml(item.trigger_source)}</p>` : ""}
+        ${item.error_summary ? `<p class="error-text">失败摘要：${escapeHtml(item.error_summary)}</p>` : ""}
         ${latestOutput ? `<p>最新产物：${escapeHtml(latestOutput)}</p>` : '<p>最新产物：暂无输出</p>'}
         <div class="history-meta">${escapeHtml(item.working_directory || item.data_dir || "")}</div>
       </div>
@@ -588,6 +630,30 @@ function renderResult(result) {
   if (result.materials?.length) {
     parts.push("<p><strong>输入材料：</strong></p>");
     parts.push(...result.materials.map((item) => `<p>${escapeHtml(item)}</p>`));
+  }
+  if (result.executor || result.priority_quadrant) {
+    parts.push(`<p>执行器：${escapeHtml(result.executor || "-")} · 优先级：${escapeHtml(result.priority_quadrant || "-")}</p>`);
+  }
+  if (result.run_status && result.run_status !== "none") {
+    parts.push(`<p>运行状态：${escapeHtml(result.run_status)}</p>`);
+  }
+  if (result.latest_output) {
+    parts.push(`<p>最新输出：${escapeHtml(result.latest_output)}</p>`);
+  }
+  if (result.error_summary) {
+    parts.push(`<p class="error-text">失败摘要：${escapeHtml(result.error_summary)}</p>`);
+  }
+  if (result.experiment_result?.analysis_summary) {
+    parts.push(`<p><strong>实验回收：</strong>${escapeHtml(result.experiment_result.analysis_summary)}</p>`);
+  }
+  if (Array.isArray(result.experiment_result?.key_metrics) && result.experiment_result.key_metrics.length) {
+    parts.push(`<p>关键指标：${escapeHtml(result.experiment_result.key_metrics.join(" / "))}</p>`);
+  }
+  if (Array.isArray(result.experiment_result?.pending_confirmations) && result.experiment_result.pending_confirmations.length) {
+    parts.push(`<p>待确认：${escapeHtml(result.experiment_result.pending_confirmations.join("；"))}</p>`);
+  }
+  if (result.prototype_task?.prototype_path) {
+    parts.push(`<p>原型路径：${escapeHtml(result.prototype_task.prototype_path)} · 预览：${escapeHtml(result.prototype_task.preview_status || "-")}</p>`);
   }
   if (result.doc_draft?.url) {
     parts.push(`<p><a class="link" href="${escapeHtml(result.doc_draft.url)}" target="_blank" rel="noopener noreferrer">打开飞书草稿</a></p>`);

@@ -10,6 +10,13 @@ from .lobster_bridge import discover_lobster_tasks
 from .task_pipeline import TaskPipeline
 from .workbench_state import WorkbenchState
 
+PROTOTYPE_SPEC_PATH = (
+    r"D:\Docspace\Desktop\Product prototype html(1)\Product prototype html\【规范】HTML原型文件出图要求.md"
+)
+H2D_REFERENCE_PATH = (
+    r"D:\CodeX\Database\Product prototype html(1)\_D_Docspace_Desktop_Product_20prototype_20html_1_Product_20prototype_20html_buchong2_1912w_default.h2d"
+)
+
 
 class WorkbenchRequestHandler(SimpleHTTPRequestHandler):
     server_version = "TongchengWorkbench/1.0"
@@ -151,9 +158,38 @@ class WorkbenchRequestHandler(SimpleHTTPRequestHandler):
             "document_channel": feishu_config.get("document_channel", ""),
             "document_strategy": feishu_config.get("document_strategy", {}),
         }
+        state["prototype_config"] = {
+            "prototype_spec_path": PROTOTYPE_SPEC_PATH,
+            "h2d_reference_path": H2D_REFERENCE_PATH,
+            "figma_import": "deferred_in_1_0",
+        }
         state["workflow_instances"] = state.get("workflow_instances", [])[:12]
-        state["lobster_tasks"] = discover_lobster_tasks()[:12]
+        state["lobster_tasks"] = self._merge_lobster_runtime(discover_lobster_tasks()[:12], state["workflow_instances"])
         return state
+
+    def _merge_lobster_runtime(self, tasks: list[dict], workflows: list[dict]) -> list[dict]:
+        latest_by_task: dict[str, dict] = {}
+        for workflow in workflows:
+            task_name = str(workflow.get("lobster_task_name", "")).strip()
+            if not task_name:
+                continue
+            latest_by_task[task_name] = workflow
+
+        merged: list[dict] = []
+        for task in tasks:
+            runtime = latest_by_task.get(task.get("name", ""), {})
+            task_copy = dict(task)
+            if runtime:
+                task_copy["status"] = runtime.get("run_status", task_copy.get("status", "scheduled"))
+                task_copy["latest_output"] = runtime.get("latest_output", "")
+                task_copy["error_summary"] = runtime.get("error_summary", "")
+                task_copy["trigger_source"] = runtime.get("trigger_source", "")
+            else:
+                task_copy.setdefault("latest_output", "")
+                task_copy.setdefault("error_summary", "")
+                task_copy.setdefault("trigger_source", "")
+            merged.append(task_copy)
+        return merged
 
 
 def run_workbench_server(base_dir: Path, host: str = "127.0.0.1", port: int = 4390) -> None:
