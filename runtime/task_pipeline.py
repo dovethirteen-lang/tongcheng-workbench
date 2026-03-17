@@ -342,7 +342,12 @@ class TaskPipeline:
             local_exec_status = "failed"
             run_status = "failed" if executor == "lobster" else run_status
 
-        if workflow_stage in {"completed", "archive_ready", "archived"} and executor == "lobster" and run_status != "failed":
+        if (
+            workflow_stage in {"completed", "archive_ready", "archived", "waiting_human"}
+            and executor == "lobster"
+            and run_status != "failed"
+            and local_exec_status != "failed"
+        ):
             run_status = "success"
 
         return {

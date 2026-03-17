@@ -1,9 +1,9 @@
 {
-  "updated_at": "2026-03-17T22:06:33",
+  "updated_at": "2026-03-17T22:15:02",
   "alert_count": 3,
   "todo_count": 4,
   "feedback_count": 0,
-  "document_count": 0,
+  "document_count": 3,
   "top_alert": {
     "id": "alert-20260316003904",
     "title": "这是一个广告专项任务。资料位置：https://www.notion.so/test`n请记录一条数据告警。`n写清异常",
